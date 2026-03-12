@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservationService } from '../../core/services/reservation.service';
-import { ReservationDto, Book } from '../../models/models';
 import { BookService } from '../../core/services/book.service';
+import { ReservationDto, Book } from '../../models/models';
 
 @Component({
   selector: 'app-reservations',
@@ -10,148 +10,191 @@ import { BookService } from '../../core/services/book.service';
   styleUrls: ['./reservations.component.scss']
 })
 export class ReservationsComponent implements OnInit {
+
+  // ── Data ─────────────────────────────────────────────────
   reservations: ReservationDto[] = [];
-  loading = false;
-  error = '';
-  success = '';
-  showModal = false;
+
+  // ── UI state ──────────────────────────────────────────────
+  loading   = false;
+  submitting = false;
+  error     = '';
+  success   = '';
+
+  // ── Modal state ───────────────────────────────────────────
+  showModal   = false;
   editingRes: ReservationDto | null = null;
+
+  // ── Book lookup (create form) ─────────────────────────────
+  isbnQuery     = '';
   lookingUpBook = false;
   foundBook: Book | null = null;
+  bookId        = '';
+  bookError     = '';
 
-  resForm: any = { bookId: '', isbnQuery: '', reservationStatus: 'Active' };
-  formErrors: any = {};
+  // ── Edit form (admin/librarian review) ───────────────────
+  selectedStatus = 'Pending';
+
+  readonly STATUS_OPTIONS = [
+    { value: 'Active',    label: '✅ Active',    hint: 'Book is currently Reserved' },
+    { value: 'Fulfilled', label: '📦 Fulfilled', hint: 'Book has been returned' },
+    { value: 'Cancelled', label: '❌ Cancelled', hint: 'Cancel this reservation' },
+  ];
 
   constructor(
-    public auth: AuthService, 
+    public  auth:       AuthService,
     private resService: ReservationService,
-    private bookService: BookService
+    private bookSvc:    BookService
   ) {}
 
-  ngOnInit() { this.load(); }
+  ngOnInit(): void { this.load(); }
 
-  load() {
+  // ── Load reservations ─────────────────────────────────────
+  load(): void {
     this.loading = true;
-    this.error = '';
+    this.error   = '';
     this.resService.getAll().subscribe({
-      next: r => { this.reservations = r.data || []; this.loading = false; },
+      next:  r => { this.reservations = r.data || []; this.loading = false; },
       error: e => { this.error = e.error?.message || 'Could not load reservations.'; this.loading = false; }
     });
   }
 
-  openAdd() {
-    this.editingRes = null;
-    this.resForm = { bookId: '', isbnQuery: '' };
-    this.foundBook = null;
-    this.formErrors = {};
-    this.error = '';
-    this.showModal = true;
+  // ── Open modal: Reader — create reservation ───────────────
+  openCreate(): void {
+    this.editingRes    = null;
+    this.isbnQuery     = '';
+    this.foundBook     = null;
+    this.bookId        = '';
+    this.bookError     = '';
+    this.error         = '';
+    this.showModal     = true;
   }
 
-  openEdit(r: ReservationDto) {
-    this.editingRes = r;
-    this.foundBook = r.book || null;
-    this.resForm = { reservationStatus: r.status || 'Pending' };
-    this.formErrors = {};
-    this.error = '';
-    this.showModal = true;
+  // ── Open modal: Admin/Librarian — review reservation ──────
+  openReview(r: ReservationDto): void {
+    this.editingRes    = r;
+    this.selectedStatus = r.status || 'Pending';
+    this.error         = '';
+    this.showModal     = true;
   }
 
-  lookupBook() {
-    if (!this.resForm.isbnQuery) return;
+  closeModal(): void { this.showModal = false; this.error = ''; }
+
+  // ── ISBN Lookup ───────────────────────────────────────────
+  lookupBook(): void {
+    if (!this.isbnQuery.trim()) return;
     this.lookingUpBook = true;
-    this.error = '';
-    this.bookService.getByIsbn(this.resForm.isbnQuery).subscribe({
-      next: (res) => {
-        this.foundBook = res.data;
-        this.resForm.bookId = res.data.bookId;
+    this.bookError     = '';
+    this.foundBook     = null;
+    this.bookSvc.getByIsbn(this.isbnQuery.trim()).subscribe({
+      next: res => {
+        this.foundBook     = res.data;
+        this.bookId        = String(res.data.bookId);
         this.lookingUpBook = false;
       },
-      error: (e) => {
-        this.error = e.error?.message || 'Book not found with this ISBN.';
-        this.foundBook = null;
-        this.resForm.bookId = '';
+      error: e => {
+        this.bookError     = e.error?.message || 'No book found with this ISBN.';
         this.lookingUpBook = false;
       }
     });
   }
 
-  closeModal() { this.showModal = false; this.error = ''; }
-
-  validate(): boolean {
-    this.formErrors = {};
-    if (!this.editingRes && !this.resForm.bookId) this.formErrors.bookId = 'Book ID is required.';
-    return Object.keys(this.formErrors).length === 0;
+  clearBook(): void {
+    this.foundBook = null;
+    this.bookId    = '';
+    this.isbnQuery = '';
+    this.bookError = '';
   }
 
-  save() {
-    if (!this.validate()) return;
-    const userId = Number(this.auth.getUserId());
-
-    // Check availability for new reservations
-    if (!this.editingRes && this.foundBook && this.foundBook.availabilityStatus !== 'Available') {
-      this.error = `Cannot reserve: Book status is ${this.foundBook.availabilityStatus}. Only Available books can be reserved.`;
+  // ── Submit: create reservation (Reader) ───────────────────
+  submitCreate(): void {
+    if (!this.bookId) { this.bookError = 'Please enter or look up a Book ID.'; return; }
+    if (this.foundBook && this.foundBook.availabilityStatus !== 'Available') {
+      this.error = `This book is currently ${this.foundBook.availabilityStatus} and cannot be reserved.`;
       return;
     }
-
-    const obs = this.editingRes
-      ? this.resService.update(this.editingRes.reservationId!, { status: this.resForm.reservationStatus })
-      : this.resService.create({
-          user: { userId },
-          book: { bookId: Number(this.resForm.bookId) }
-        });
-
-    obs.subscribe({
+    this.submitting = true;
+    this.error      = '';
+    this.resService.create({ book: { bookId: Number(this.bookId) } }).subscribe({
       next: () => {
-        this.success = this.editingRes
-          ? 'Reservation updated!'
-          : '✅ Reservation sent! Waiting for librarian/admin approval.';
+        this.submitting = false;
+        this.success    = '✅ Reservation successful! The book is now reserved for you.';
+        this.closeModal();
+        this.load();
+        setTimeout(() => this.success = '', 5000);
+      },
+      error: e => {
+        this.submitting = false;
+        this.error = e.error?.message || 'Failed to create reservation.';
+      }
+    });
+  }
+
+  // ── Submit: update status (Admin/Librarian) ───────────────
+  submitUpdate(): void {
+    if (!this.editingRes) return;
+    this.submitting = true;
+    this.error      = '';
+    this.resService.update(this.editingRes.reservationId!, { status: this.selectedStatus }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.success    = `Reservation status updated to "${this.selectedStatus}".`;
         this.closeModal();
         this.load();
         setTimeout(() => this.success = '', 4000);
       },
-      error: e => { 
-        this.error = e.error?.message || 'Error saving reservation.';
-        if (e.error?.data) {
-          this.error += ' (' + e.error.data + ')';
-        }
+      error: e => {
+        this.submitting = false;
+        this.error = e.error?.message || 'Failed to update reservation.';
       }
     });
   }
 
-  delete(r: ReservationDto) {
-    if (!confirm('Delete this reservation?')) return;
-    this.resService.delete(r.reservationId!).subscribe({
-      next: () => { this.success = 'Reservation deleted.'; this.load(); setTimeout(() => this.success = '', 3000); },
-      error: e => { this.error = e.error?.message || 'Error deleting.'; }
-    });
-  }
-
-  cancelReservation(r: ReservationDto) {
-    if (!confirm('Are you sure you want to cancel this reservation request?')) return;
+  // ── Cancel: reader cancels their own reservation ──────────
+  cancelReservation(r: ReservationDto): void {
+    if (!confirm('Cancel this reservation request?')) return;
     this.resService.update(r.reservationId!, { status: 'Cancelled' }).subscribe({
-      next: () => { 
-        this.success = 'Reservation cancelled successfully.'; 
-        this.load(); 
-        setTimeout(() => this.success = '', 3000); 
+      next: () => {
+        this.success = 'Reservation cancelled.';
+        this.load();
+        setTimeout(() => this.success = '', 3000);
       },
-      error: e => { this.error = e.error?.message || 'Error cancelling reservation.'; }
+      error: e => { this.error = e.error?.message || 'Could not cancel reservation.'; }
     });
   }
 
+  // ── Delete: admin/librarian only ──────────────────────────
+  deleteReservation(r: ReservationDto): void {
+    if (!confirm(`Delete reservation for "${r.book?.title || 'this book'}"?`)) return;
+    this.resService.delete(r.reservationId!).subscribe({
+      next: () => {
+        this.success = 'Reservation deleted.';
+        this.load();
+        setTimeout(() => this.success = '', 3000);
+      },
+      error: e => { this.error = e.error?.message || 'Could not delete reservation.'; }
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
   statusClass(s?: string): string {
-    if (s === 'Pending')   return 'badge-warning';
-    if (s === 'Active')    return 'badge-success';
-    if (s === 'Cancelled') return 'badge-danger';
-    if (s === 'Fulfilled') return 'badge-muted';
-    return 'badge-muted';
+    const map: Record<string, string> = {
+      'Active':    'badge-success',
+      'Cancelled': 'badge-danger',
+      'Fulfilled': 'badge-muted',
+    };
+    return map[s ?? ''] ?? 'badge-muted';
   }
 
   statusIcon(s?: string): string {
-    if (s === 'Pending')   return '⏳';
-    if (s === 'Active')    return '✅';
-    if (s === 'Cancelled') return '❌';
-    if (s === 'Fulfilled') return '📦';
-    return '•';
+    const map: Record<string, string> = {
+      'Active':    '✅',
+      'Cancelled': '❌',
+      'Fulfilled': '📦',
+    };
+    return map[s ?? ''] ?? '•';
+  }
+
+  canCancel(r: ReservationDto): boolean {
+    return this.auth.isReader() && r.status === 'Active';
   }
 }

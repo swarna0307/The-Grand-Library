@@ -45,7 +45,7 @@ export interface LoanDto {
 export interface ReservationDto {
   reservationId?: number;
   userId?: number;
-  userName?: string;
+  username?: string;
   book?: Book;
   reservedDate?: string;
   status?: 'Pending' | 'Active' | 'Cancelled' | 'Fulfilled';
