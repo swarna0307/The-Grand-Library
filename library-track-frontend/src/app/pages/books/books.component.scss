@@ -71,3 +71,20 @@
 .avail-available { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
 .avail-loaned    { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
 .avail-reserved  { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+
+.category-detail {
+  text-align: right;
+  max-width: 60%;
+}
+
+.cat-name {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.cat-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}

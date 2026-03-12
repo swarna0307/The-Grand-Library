@@ -19,6 +19,7 @@ public class ReservationDto {
     private Long reservationId;
     private Book book;                  
     private LocalDate reservedDate;
+    private LocalDate expiryDate;
     private ReservationStatus status;
     private Long userId;
     private String username;            

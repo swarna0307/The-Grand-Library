@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ReadingProgressService } from '../../core/services/reading-progress.service';
-import { ReadingProgressDto } from '../../models/models';
+import { LoanService } from '../../core/services/loan.service';
+import { ReservationService } from '../../core/services/reservation.service';
+import { ReadingProgressDto, Book } from '../../models/models';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-reading-progress',
@@ -10,6 +13,7 @@ import { ReadingProgressDto } from '../../models/models';
 })
 export class ReadingProgressComponent implements OnInit {
   progresses: ReadingProgressDto[] = [];
+  suggestedBooks: Book[] = [];
   loading = false;
   error = '';
   success = '';
@@ -21,22 +25,82 @@ export class ReadingProgressComponent implements OnInit {
   form: any = { bookId: '', pagesRead: 0, totalPages: 0 };
   formErrors: any = {};
 
-  constructor(public auth: AuthService, private progressService: ReadingProgressService) {}
+  constructor(
+    public auth: AuthService,
+    private progressService: ReadingProgressService,
+    private loanService: LoanService,
+    private reservationService: ReservationService
+  ) {}
 
   ngOnInit() { this.load(); }
 
   load() {
     this.loading = true;
     this.error = '';
-    this.progressService.getAll().subscribe({
-      next: r => { this.progresses = r.data || []; this.loading = false; },
-      error: e => { this.error = e.error?.message || 'Could not load reading progress.'; this.loading = false; }
+    
+    const obs: any = {
+      progress: this.progressService.getAll()
+    };
+    
+    // Only readers get suggestions of their own books
+    if (this.auth.isReader()) {
+      obs.loans = this.loanService.getAll();
+      obs.reservations = this.reservationService.getAll();
+    }
+
+    forkJoin(obs).subscribe({
+      next: (res: any) => {
+        this.progresses = res.progress.data || [];
+        
+        if (this.auth.isReader()) {
+          const trackedBookIds = new Set(this.progresses.map(p => p.book?.bookId));
+          const suggestions = new Map<number, Book>();
+
+          // Add books from active loans
+          res.loans.data?.forEach((l: any) => {
+            if (l.status === 'Active' || l.status === 'Overdue') {
+              if (l.book && !trackedBookIds.has(l.book.bookId)) {
+                suggestions.set(l.book.bookId!, l.book);
+              }
+            }
+          });
+
+          // Add books from active reservations
+          res.reservations.data?.forEach((r: any) => {
+            if (r.status === 'Active') {
+              if (r.book && !trackedBookIds.has(r.book.bookId)) {
+                suggestions.set(r.book.bookId!, r.book);
+              }
+            }
+          });
+
+          this.suggestedBooks = Array.from(suggestions.values());
+        }
+        
+        this.loading = false;
+      },
+      error: e => {
+        this.error = e.error?.message || 'Could not load data.';
+        this.loading = false;
+      }
     });
   }
 
   openAdd() {
     this.editing = null;
     this.form = { bookId: '', pagesRead: 0, totalPages: 0 };
+    this.formErrors = {};
+    this.error = '';
+    this.showModal = true;
+  }
+
+  startTracking(book: Book) {
+    this.editing = null;
+    this.form = {
+      bookId: book.bookId,
+      pagesRead: 0,
+      totalPages: 0 // No default, user must enter
+    };
     this.formErrors = {};
     this.error = '';
     this.showModal = true;
@@ -57,7 +121,7 @@ export class ReadingProgressComponent implements OnInit {
 
   validate(): boolean {
     this.formErrors = {};
-    if (!this.editing && !this.form.bookId) this.formErrors.bookId = 'Book ID is required.';
+    if (!this.editing && !this.form.bookId) this.formErrors.bookId = 'Please select a book you currently have.';
     
     if (Number(this.form.pagesRead) < 0) this.formErrors.pagesRead = 'Pages read cannot be negative.';
     if (Number(this.form.totalPages) <= 0) this.formErrors.totalPages = 'Total pages must be greater than zero.';

@@ -26,6 +26,7 @@ public class Book {
     private Category category;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private AvailabilityStatus availabilityStatus = AvailabilityStatus.Available;
 
 }

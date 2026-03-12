@@ -38,12 +38,9 @@ public class ReservationServiceImp implements ReservationService {
     public ReservationDto createReservation(Reservation reservation) {
         User currentUser = getCurrentUser();
 
-        if (reservation.getUser() == null || reservation.getUser().getUserId() == null) {
-            throw new AccessDeniedException("User information is missing in reservation request");
-        }
-
-        if (!reservation.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new AccessDeniedException("Readers can only create reservations for themselves");
+        // Always use the authenticated user — no need for client to send userId
+        if (!currentUser.getRole().getName().endsWith("READER")) {
+            throw new AccessDeniedException("Only Readers can create reservations");
         }
 
         if (reservation.getBook() == null || reservation.getBook().getBookId() == null) {
@@ -53,27 +50,31 @@ public class ReservationServiceImp implements ReservationService {
         Book book = bookRepository.findById(reservation.getBook().getBookId())
                 .orElseThrow(() -> new DetailsNotFoundException("Book Id not found"));
 
-        User userDetails = userRepository.findById(reservation.getUser().getUserId())
-                .orElseThrow(() -> new DetailsNotFoundException("User Id not found"));
-
-        if (!userDetails.getRole().getName().endsWith("READER")) {
-            throw new AccessDeniedException("Only Readers can create reservations");
+        // Check if book is already reserved or loaned
+        if (book.getAvailabilityStatus() != AvailabilityStatus.Available) {
+            throw new AccessDeniedException("Book is currently " + book.getAvailabilityStatus() + " and cannot be reserved");
         }
 
-        // Set initial status as Pending — book NOT reserved until admin approves
-        reservation.setUser(userDetails);
+        // Set initial status as Active — book is reserved immediately
+        reservation.setUser(currentUser);
         reservation.setBook(book);
-        reservation.setStatus(ReservationStatus.Pending);
-        // Do NOT change book availability yet — wait for approval
+        reservation.setStatus(ReservationStatus.Active);
+        reservation.setExpiryDate(LocalDate.now().plusDays(7));
+        
+        // Update book availability to Reserved immediately
+        log.info("Marking book {} (ID: {}) as Reserved", book.getTitle(), book.getBookId());
+        book.setAvailabilityStatus(AvailabilityStatus.Reserved);
+        bookRepository.save(book);
 
-        log.info("Saving reservation for user {} and book {}", userDetails.getUsername(), book.getTitle());
+        log.info("Saving reservation for user {} and book {}", currentUser.getUsername(), book.getTitle());
         try {
             Reservation saved = reservationRepository.save(reservation);
             log.info("Reservation saved successfully with ID: {}", saved.getReservationId());
             return mapToDto(saved);
         } catch (Exception e) {
-            log.error("Failed to save reservation: {}", e.getMessage(), e);
-            throw e;
+            log.error("CRITICAL: Failed to save reservation entity. Reversing book status. Error: {}", e.getMessage());
+            // Transactional rollback should handle this, but explicit log helps
+            throw new RuntimeException("DB Error: " + e.getMessage(), e);
         }
     }
 
@@ -124,6 +125,8 @@ public class ReservationServiceImp implements ReservationService {
         }
 
         if (updatedReservation.getStatus() != null) {
+            log.info("Updating Reservation ID: {} status from {} to {}", reservationId, existingReservation.getStatus(), updatedReservation.getStatus());
+            
             // Readers can only cancel their own reservations
             if (roleName.endsWith("READER")) {
                 if (updatedReservation.getStatus() != ReservationStatus.Cancelled) {
@@ -132,22 +135,25 @@ public class ReservationServiceImp implements ReservationService {
             }
 
             existingReservation.setStatus(updatedReservation.getStatus());
-            // When admin approves → mark book as Reserved
-            if (updatedReservation.getStatus() == ReservationStatus.Active) {
-                Book book = existingReservation.getBook();
-                if (book != null) {
+            
+            Book book = existingReservation.getBook();
+            if (book != null) {
+                // When active → mark book as Reserved
+                if (updatedReservation.getStatus() == ReservationStatus.Active) {
+                    log.info("Reservation Active. Marking book '{}' (ID: {}) as Reserved", book.getTitle(), book.getBookId());
                     book.setAvailabilityStatus(AvailabilityStatus.Reserved);
                     bookRepository.save(book);
                 }
-            }
-            // When cancelled or fulfilled → free the book
-            if (updatedReservation.getStatus() == ReservationStatus.Cancelled ||
-                updatedReservation.getStatus() == ReservationStatus.Fulfilled) {
-                Book book = existingReservation.getBook();
-                if (book != null) {
+                // When cancelled or fulfilled → free the book
+                else if (updatedReservation.getStatus() == ReservationStatus.Cancelled ||
+                    updatedReservation.getStatus() == ReservationStatus.Fulfilled) {
+                    log.info("Reservation {}. Resetting book '{}' (ID: {}) to Available", 
+                        updatedReservation.getStatus(), book.getTitle(), book.getBookId());
                     book.setAvailabilityStatus(AvailabilityStatus.Available);
                     bookRepository.save(book);
                 }
+            } else {
+                log.warn("Reservation ID: {} has no associated book!", reservationId);
             }
         }
         if (updatedReservation.getBook() != null)
@@ -170,11 +176,16 @@ public class ReservationServiceImp implements ReservationService {
         if (isAdminOrLibrarian(roleName) || (roleName.endsWith("READER") && reservation.getUser().getUserId().equals(currentUser.getUserId()))) {
             // Free the book when reservation is deleted (if it was active)
             Book book = reservation.getBook();
-            if (book != null && book.getAvailabilityStatus() == AvailabilityStatus.Reserved) {
-                book.setAvailabilityStatus(AvailabilityStatus.Available);
-                bookRepository.save(book);
+            if (book != null) {
+                log.info("Deleting reservation ID: {}. Current book status: {}", reservationId, book.getAvailabilityStatus());
+                if (book.getAvailabilityStatus() == AvailabilityStatus.Reserved) {
+                    log.info("Freeing book '{}' (ID: {}) on reservation deletion", book.getTitle(), book.getBookId());
+                    book.setAvailabilityStatus(AvailabilityStatus.Available);
+                    bookRepository.save(book);
+                }
             }
             reservationRepository.delete(reservation);
+            log.info("Reservation ID: {} deleted successfully", reservationId);
             return "Reservation deletion completed";
         }
         throw new AccessDeniedException("You do not have permission to delete this reservation");
@@ -192,6 +203,7 @@ public class ReservationServiceImp implements ReservationService {
                 .username(capitalizedUsername)
                 .book(reservation.getBook())
                 .reservedDate(reservation.getReservedDate())
+                .expiryDate(reservation.getExpiryDate())
                 .status(reservation.getStatus())
                 .build();
     }

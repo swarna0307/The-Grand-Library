@@ -92,7 +92,13 @@
       </div>
       <div class="detail-rows">
         <div class="detail-row"><span class="detail-label">📑 ISBN</span><span>{{ selectedBook.isbn || '—' }}</span></div>
-        <div class="detail-row"><span class="detail-label">🗂️ Category</span><span>{{ selectedBook.category?.name || '—' }}</span></div>
+        <div class="detail-row">
+          <span class="detail-label">🗂️ Category</span>
+          <div class="category-detail">
+            <div class="cat-name">{{ selectedBook.category?.name || '—' }}</div>
+            <div class="cat-desc" *ngIf="selectedBook.category?.description">{{ selectedBook.category?.description }}</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">

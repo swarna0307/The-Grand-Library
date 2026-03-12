@@ -17,5 +17,6 @@ public class BookDto {
     private String author;
     private String isbn;
     private AvailabilityStatus availabilityStatus;
+    private CategoryDto category;
     
 }

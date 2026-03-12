@@ -18,11 +18,28 @@
       <div class="loading" *ngIf="loading">Loading...</div>
 
       <div *ngIf="!loading">
-        <div class="empty-state glass-card" *ngIf="progresses.length === 0">
+        <div class="empty-state glass-card" *ngIf="progresses.length === 0 && suggestedBooks.length === 0">
           <div class="empty-icon">📈</div>
           <h3>No progress tracked</h3>
           <p *ngIf="auth.isReader()">Start tracking your reading — enter pages read and % complete!</p>
           <p *ngIf="auth.isAdminOrLibrarian()">No readers have tracked progress yet.</p>
+        </div>
+
+        <!-- SUGGESTIONS FOR READERS -->
+        <div class="suggestions-section" *ngIf="suggestedBooks.length > 0 && auth.isReader() && !loading">
+          <div class="section-badge">✨ Ready to Read</div>
+          <h2 class="section-title">Books you currently have</h2>
+          <div class="suggestions-row">
+            <div class="suggestion-card glass-card" *ngFor="let b of suggestedBooks">
+              <div class="sug-info">
+                <strong>{{ b.title }}</strong>
+                <span>{{ b.author }}</span>
+              </div>
+              <button class="btn btn-primary btn-sm" (click)="startTracking(b)">
+                📖 Start Tracking
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- READER VIEW (Grid) -->
@@ -130,9 +147,16 @@
     <div class="modal-body">
       <div class="alert alert-error" *ngIf="error">{{ error }}</div>
       <div class="form-group">
-        <label>Book ID *</label>
-        <input type="number" class="form-control" [class.is-invalid]="formErrors.bookId"
-               [(ngModel)]="form.bookId" placeholder="Enter Book ID">
+        <label>Select Book *</label>
+        <select class="form-control" [class.is-invalid]="formErrors.bookId" [(ngModel)]="form.bookId">
+          <option value="" disabled selected>-- Choose a book you have --</option>
+          <option *ngFor="let b of suggestedBooks" [value]="b.bookId">
+            {{ b.title }} (by {{ b.author }})
+          </option>
+        </select>
+        <div class="field-hint" *ngIf="suggestedBooks.length === 0" style="color: var(--warning); font-size: 11px; margin-top: 4px;">
+          ⚠️ You don't have any active loans or reservations to track.
+        </div>
         <span class="field-error" *ngIf="formErrors.bookId">{{ formErrors.bookId }}</span>
       </div>
       <div class="form-group">

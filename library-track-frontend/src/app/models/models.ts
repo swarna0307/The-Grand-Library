@@ -48,6 +48,7 @@ export interface ReservationDto {
   username?: string;
   book?: Book;
   reservedDate?: string;
+  expiryDate?: string;
   status?: 'Pending' | 'Active' | 'Cancelled' | 'Fulfilled';
 }
 

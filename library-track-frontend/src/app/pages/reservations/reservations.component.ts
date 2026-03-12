@@ -124,7 +124,9 @@ export class ReservationsComponent implements OnInit {
       },
       error: e => {
         this.submitting = false;
-        this.error = e.error?.message || 'Failed to create reservation.';
+        // Show detailed error if available
+        const detail = e.error?.data ? ` (${e.error.data})` : '';
+        this.error = (e.error?.message || 'Failed to create reservation') + detail;
       }
     });
   }

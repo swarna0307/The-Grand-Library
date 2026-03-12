@@ -1,10 +1,12 @@
 package com.pod3.libraryTrack.implementation;
 
 import java.util.List;
+import java.util.Arrays;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.pod3.libraryTrack.Exceptions.BookNotExistsException;
 import com.pod3.libraryTrack.Exceptions.CategoryNotFoundException;
+import com.pod3.libraryTrack.Exceptions.AccessDeniedException;
 import com.pod3.libraryTrack.Exceptions.DetailsAlreadyExistsException;
 import com.pod3.libraryTrack.dto.BookDto;
 import com.pod3.libraryTrack.dto.CategoryDto;
@@ -12,6 +14,11 @@ import com.pod3.libraryTrack.model.Book;
 import com.pod3.libraryTrack.model.Category;
 import com.pod3.libraryTrack.repository.BookRepository;
 import com.pod3.libraryTrack.repository.CategoryRepository;
+import com.pod3.libraryTrack.repository.ReadingProgressRepository;
+import com.pod3.libraryTrack.constants.LoanStatus;
+import com.pod3.libraryTrack.constants.ReservationStatus;
+import com.pod3.libraryTrack.repository.LoanRepository;
+import com.pod3.libraryTrack.repository.ReservationRepository;
 import com.pod3.libraryTrack.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +75,11 @@ public class BookServiceImp implements BookService {
 						.author(book.getAuthor())
 						.isbn(book.getIsbn())
 						.availabilityStatus(book.getAvailabilityStatus())
+						.category(CategoryDto.builder()
+								.categoryId(category.getCategoryId())
+								.name(category.getName())
+								.description(category.getDescription())
+								.build())
 						.build()).toList();
 
 		return CategoryDto.builder()
@@ -100,13 +112,37 @@ public class BookServiceImp implements BookService {
 		return bookRepository.save(book);
 	}
 
+	private final ReadingProgressRepository readingProgressRepository;
+	private final LoanRepository loanRepository;
+	private final ReservationRepository reservationRepository;
+
 	@Override
 	@Transactional
 	public String deleteBook(Long categoryId, Long bookId) {
 		Book book = bookRepository.findById(bookId).filter(b -> b.getCategory().getCategoryId().equals(categoryId))
 				.orElseThrow(() -> new BookNotExistsException("Book not found or category mismatch"));
 
+		log.info("Performing safety checks before deleting book ID: {}", bookId);
+		
+		// Check for active loans
+		if (loanRepository.existsByBookBookIdAndStatusIn(bookId, Arrays.asList(LoanStatus.Active, LoanStatus.Overdue))) {
+			throw new AccessDeniedException("Cannot delete book with active or overdue loans. Please return the book first.");
+		}
+
+		// Check for active reservations
+		if (reservationRepository.existsByBookBookIdAndStatus(bookId, ReservationStatus.Active)) {
+			throw new AccessDeniedException("Cannot delete book with active reservations. Please cancel the reservations first.");
+		}
+
+		log.info("Performing cascading deletion for book ID: {}", bookId);
+		
+		// Clean up dependent records first to avoid FK constraint violations
+		readingProgressRepository.deleteByBookBookId(bookId);
+		loanRepository.deleteByBookBookId(bookId);
+		reservationRepository.deleteByBookBookId(bookId);
+
 		bookRepository.delete(book);
+		log.info("Book ID: {} deleted successfully", bookId);
 		return "Book deleted successfully";
 	}
 

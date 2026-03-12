@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import com.pod3.libraryTrack.constants.ReservationStatus;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -40,6 +41,10 @@ public class Reservation {
     @CreationTimestamp
     private LocalDate reservedDate;
 
+    private LocalDate expiryDate;
+
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    @Column(length = 20)
+    @Builder.Default
+    private ReservationStatus status = ReservationStatus.Active;
 }

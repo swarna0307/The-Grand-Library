@@ -99,13 +99,18 @@ public class LoanServiceImp implements LoanService {
 		if (loan.getReturnDate() != null)
 			loanTemp.setReturnDate(loan.getReturnDate());
 		if (loan.getStatus() != null) {
+			log.info("Updating Loan ID: {} status from {} to {}", loanId, loanTemp.getStatus(), loan.getStatus());
 			loanTemp.setStatus(loan.getStatus());
+			
 			// When loan is returned, free the book
 			if (loan.getStatus() == LoanStatus.Returned) {
 				Book book = loanTemp.getBook();
 				if (book != null) {
+					log.info("Loan returned. Resetting book '{}' (ID: {}) to Available", book.getTitle(), book.getBookId());
 					book.setAvailabilityStatus(AvailabilityStatus.Available);
 					bookRepository.save(book);
+				} else {
+					log.warn("Loan ID: {} marked as Returned but has no associated Book!", loanId);
 				}
 			}
 		}
@@ -122,12 +127,18 @@ public class LoanServiceImp implements LoanService {
 
 		// Free the book when loan record is deleted
 		Book book = loan.getBook();
-		if (book != null && book.getAvailabilityStatus() == AvailabilityStatus.Loaned) {
-			book.setAvailabilityStatus(AvailabilityStatus.Available);
-			bookRepository.save(book);
+		if (book != null) {
+			log.info("Deleting loan ID: {}. Current book status: {}", loanId, book.getAvailabilityStatus());
+			// Only free the book if the loan being deleted is the ACTIVE one
+			if (loan.getStatus() != LoanStatus.Returned && book.getAvailabilityStatus() == AvailabilityStatus.Loaned) {
+				log.info("Freeing book '{}' (ID: {}) on deletion of active/overdue loan", book.getTitle(), book.getBookId());
+				book.setAvailabilityStatus(AvailabilityStatus.Available);
+				bookRepository.save(book);
+			}
 		}
 
 		loanRepo.delete(loan);
+		log.info("Loan ID: {} deleted successfully", loanId);
 		return "Loan Deleted";
 	}
 
