@@ -1,0 +1,78 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-container" style="margin-top: 64px;">
+      <div class="page-header">
+        <div><h1>👥 User Management</h1><div class="page-subtitle">Admin-only — manage all users and roles</div></div>
+        <button class="btn btn-primary" (click)="openAdd()">+ Create User</button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+      <div class="loading" *ngIf="loading">Loading users...</div>
+
+      <div class="glass-card table-wrapper" *ngIf="!loading && !error">
+        <div class="empty-state" *ngIf="users.length === 0">
+          <div class="empty-icon">👥</div><h3>No users found</h3>
+        </div>
+        <table class="data-table" *ngIf="users.length > 0">
+          <thead>
+            <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Gender</th><th>Phone</th><th>Registered</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of users; let i = index">
+              <td><span class="id-badge">#{{ u.userId }}</span></td>
+              <td><strong>{{ u.username }}</strong></td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge" [ngClass]="getRoleClass(u.role)">{{ getRoleDisplay(u.role) }}</span></td>
+              <td>{{ u.gender || '—' }}</td>
+              <td>{{ u.phone || '—' }}</td>
+              <td>{{ u.registeredDate || '—' }}</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn btn-secondary btn-sm" (click)="openEdit(u)">✏️ Edit</button>
+                  <button class="btn btn-danger btn-sm" (click)="delete(u)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingUser ? '✏️ Edit User' : '➕ Create User' }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="form-group"><label>Username *</label><input class="form-control" [(ngModel)]="userForm.username" placeholder="Username" [disabled]="!!editingUser"></div>
+    <div class="form-group"><label>Email *</label><input type="email" class="form-control" [(ngModel)]="userForm.email" placeholder="Email" [disabled]="!!editingUser"></div>
+    <div class="form-group" *ngIf="!editingUser"><label>Password *</label><input type="password" class="form-control" [(ngModel)]="userForm.password" placeholder="Password"></div>
+    <div class="form-group">
+      <label>Role</label>
+      <select class="form-control" [(ngModel)]="userForm.role.name">
+        <option value="ROLE_ADMIN">Admin</option>
+        <option value="ROLE_LIBRARIAN">Librarian</option>
+        <option value="ROLE_READER">Reader</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Gender</label>
+      <select class="form-control" [(ngModel)]="userForm.gender">
+        <option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Phone</label><input type="tel" class="form-control" [(ngModel)]="userForm.phone" placeholder="Phone"></div>
+    <div class="form-group"><label>Address</label><input class="form-control" [(ngModel)]="userForm.address" placeholder="Address"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="loading">{{ loading ? 'Saving...' : 'Save User' }}</button>
+    </div>
+  </div>
+</div>

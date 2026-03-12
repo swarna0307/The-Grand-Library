@@ -1,0 +1,169 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-container" style="margin-top: 64px;">
+
+      <div class="page-header">
+        <div>
+          <h1>📖 Books</h1>
+          <p class="page-subtitle">
+            {{ selectedCategory ? 'Category: ' + selectedCategory.name : 'All Books' }}
+            <span *ngIf="books.length"> · {{ books.length }} book{{ books.length !== 1 ? 's' : '' }}</span>
+          </p>
+        </div>
+        <div class="header-actions">
+          <input class="search-input" type="text" placeholder="🔍 Search title or author..."
+                 [(ngModel)]="searchTerm" (input)="applySearch()">
+          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
+            ➕ Add Book
+          </button>
+        </div>
+      </div>
+
+      <div class="alert alert-success" *ngIf="success">✅ {{ success }}</div>
+      <div class="alert alert-error"   *ngIf="error && !showModal">{{ error }}</div>
+
+      <!-- Category Tabs -->
+      <div class="category-tabs" *ngIf="categories.length > 0">
+        <button class="tab-btn" [class.active]="!selectedCategoryId" (click)="loadAll()">
+          🗂️ All
+        </button>
+        <button class="tab-btn" *ngFor="let c of categories"
+                [class.active]="selectedCategoryId === c.categoryId"
+                (click)="selectCategory(c.categoryId!)">
+          {{ c.name }}
+        </button>
+      </div>
+
+      <div class="loading" *ngIf="loading">Loading books...</div>
+
+      <div *ngIf="!loading">
+        <div class="empty-state glass-card" *ngIf="filtered.length === 0">
+          <div class="empty-icon">📖</div>
+          <h3>No books found</h3>
+          <p *ngIf="auth.isAdminOrLibrarian()">Add the first book using the button above.</p>
+          <p *ngIf="auth.isReader()">No books in this category yet.</p>
+        </div>
+
+        <div class="books-grid" *ngIf="filtered.length > 0">
+          <div class="book-card glass-card" *ngFor="let b of filtered" (click)="openDetail(b)">
+            <div class="book-cover">
+              <span class="book-icon">📗</span>
+            </div>
+            <div class="book-info">
+              <h4 class="book-title">{{ b.title }}</h4>
+              <p class="book-author">by {{ b.author }}</p>
+              <p class="book-isbn" *ngIf="b.isbn">ISBN: {{ b.isbn }}</p>
+              <div class="book-footer">
+                <span class="badge" [ngClass]="availClass(b.availabilityStatus)">
+                  {{ b.availabilityStatus || 'Available' }}
+                </span>
+                <div class="book-actions" *ngIf="auth.isAdminOrLibrarian()" (click)="$event.stopPropagation()">
+                  <button class="btn btn-secondary btn-sm btn-icon" (click)="openEdit(b)" title="Edit">✏️</button>
+                  <button class="btn btn-danger btn-sm btn-icon" (click)="delete(b)" title="Delete">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Book Detail Modal -->
+<div class="modal-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📖 Book Details</h3>
+      <button class="close-btn" (click)="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedBook">
+      <div class="book-detail-header">
+        <div class="book-cover-lg">📗</div>
+        <div>
+          <h2 class="detail-title">{{ selectedBook.title }}</h2>
+          <p class="detail-author">by {{ selectedBook.author }}</p>
+          <span class="badge" [ngClass]="availClass(selectedBook.availabilityStatus)">
+            {{ selectedBook.availabilityStatus || 'Available' }}
+          </span>
+        </div>
+      </div>
+      <div class="detail-rows">
+        <div class="detail-row"><span class="detail-label">📑 ISBN</span><span>{{ selectedBook.isbn || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">🗂️ Category</span><span>{{ selectedBook.category?.name || '—' }}</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDetail()">Close</button>
+      
+      <!-- Reader Role: Reserve -->
+      <button *ngIf="auth.isReader() && selectedBook" 
+              class="btn btn-primary" 
+              (click)="reserveBook(selectedBook)"
+              [disabled]="!canReserve(selectedBook)"
+              [title]="!canReserve(selectedBook) ? 'Book is currently ' + selectedBook.availabilityStatus : 'Submit reservation request'">
+        {{ canReserve(selectedBook) ? '📖 Reserve Book' : '🚫 Not Available' }}
+      </button>
+
+      <!-- Admin/Librarian Role: Issue Loan -->
+      <button *ngIf="auth.isAdminOrLibrarian() && selectedBook"
+              class="btn btn-primary"
+              (click)="loanBook(selectedBook)"
+              [disabled]="!canLoan(selectedBook)"
+              [title]="!canLoan(selectedBook) ? 'Book is currently ' + selectedBook.availabilityStatus : 'Issue a new loan'">
+        {{ canLoan(selectedBook) ? '🤝 Issue Loan' : '🚫 Not Available' }}
+      </button>
+
+      <button class="btn btn-primary btn-outline" *ngIf="auth.isAdminOrLibrarian()" (click)="closeDetail(); openEdit(selectedBook!)">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Book Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editing ? '✏️ Edit Book' : '➕ Add Book' }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="form-group">
+        <label>Title *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.title" [(ngModel)]="form.title" placeholder="Book title">
+        <span class="field-error" *ngIf="formErrors.title">{{ formErrors.title }}</span>
+      </div>
+      <div class="form-group">
+        <label>Author *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.author" [(ngModel)]="form.author" placeholder="Author name">
+        <span class="field-error" *ngIf="formErrors.author">{{ formErrors.author }}</span>
+      </div>
+      <div class="form-group">
+        <label>ISBN</label>
+        <input class="form-control" [(ngModel)]="form.isbn" placeholder="ISBN (optional)">
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select class="form-control" [class.is-invalid]="formErrors.categoryId" [(ngModel)]="form.categoryId">
+          <option value="">Select a category</option>
+          <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.name }}</option>
+        </select>
+        <span class="field-error" *ngIf="formErrors.categoryId">{{ formErrors.categoryId }}</span>
+      </div>
+      <div class="form-group" *ngIf="editing">
+        <label>Availability</label>
+        <select class="form-control" [(ngModel)]="form.availabilityStatus">
+          <option value="Available">✅ Available</option>
+          <option value="Loaned">📋 Loaned</option>
+          <option value="Reserved">🔖 Reserved</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">{{ editing ? '💾 Save' : '➕ Add Book' }}</button>
+    </div>
+  </div>
+</div>

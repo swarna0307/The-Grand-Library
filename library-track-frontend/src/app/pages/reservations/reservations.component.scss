@@ -1,0 +1,8 @@
+.user-cell { display: flex; align-items: center; gap: 8px; }
+.avatar-xs {
+  width: 28px; height: 28px; border-radius: 50%; font-size: 12px; font-weight: 700;
+  background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.book-cell { display: flex; flex-direction: column; gap: 2px; }
+.book-author-sm { font-size: 11px; color: #94a3b8; }

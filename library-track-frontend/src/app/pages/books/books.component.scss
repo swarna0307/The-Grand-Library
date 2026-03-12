@@ -1,0 +1,73 @@
+.category-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  padding: 7px 16px; border-radius: 999px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: #94a3b8; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+  &:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+  &.active { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #f59e0b; }
+}
+
+.header-actions {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+
+.search-input {
+  background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 9px 16px; color: #f1f5f9;
+  font-family: 'Inter', sans-serif; font-size: 13px; width: 240px;
+  &:focus { outline: none; border-color: #f59e0b; }
+  &::placeholder { color: rgba(148,163,184,0.6); }
+}
+
+.books-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+}
+
+.book-card {
+  cursor: pointer; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  &:hover { transform: translateY(-3px); }
+
+  .book-cover { text-align: center; font-size: 48px; }
+
+  .book-info {
+    display: flex; flex-direction: column; gap: 4px;
+    .book-title  { font-size: 15px; font-weight: 700; line-height: 1.3; }
+    .book-author { font-size: 12px; color: #94a3b8; }
+    .book-isbn   { font-size: 11px; color: #64748b; }
+  }
+
+  .book-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; flex-wrap: wrap; gap: 6px;
+    .book-actions { display: flex; gap: 4px; }
+  }
+}
+
+.book-detail-header {
+  display: flex; gap: 20px; align-items: flex-start;
+  .book-cover-lg { font-size: 64px; flex-shrink: 0; }
+  .detail-title  { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .detail-author { color: #94a3b8; font-size: 14px; margin-bottom: 10px; }
+}
+
+.detail-rows {
+  display: flex; flex-direction: column; gap: 10px;
+  background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px;
+}
+
+.detail-row {
+  display: flex; justify-content: space-between; font-size: 13px;
+  .detail-label { color: #94a3b8; font-weight: 500; }
+}
+
+// Availability badge classes (referenced from global styles)
+.avail-available { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.avail-loaned    { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.avail-reserved  { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }

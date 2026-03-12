@@ -1,0 +1,153 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-container" style="margin-top: 64px;">
+
+      <div class="page-header">
+        <div>
+          <h1>📋 Loans</h1>
+          <p class="page-subtitle" *ngIf="auth.isAdminOrLibrarian()">Manage all library book loans</p>
+          <p class="page-subtitle" *ngIf="auth.isReader()">Your borrowed books</p>
+        </div>
+        <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
+          ➕ New Loan
+        </button>
+      </div>
+
+      <div class="alert alert-success" *ngIf="success">✅ {{ success }}</div>
+      <div class="alert alert-error"   *ngIf="error && !showModal">{{ error }}</div>
+      <div class="loading" *ngIf="loading">Loading loans...</div>
+
+      <div class="glass-card table-wrapper" *ngIf="!loading">
+        <div class="empty-state" *ngIf="loans.length === 0">
+          <div class="empty-icon">📋</div>
+          <h3>No loans found</h3>
+          <p *ngIf="auth.isAdminOrLibrarian()">Create a new loan when a reader borrows a book.</p>
+          <p *ngIf="auth.isReader()">You have no active loans right now.</p>
+        </div>
+
+        <table class="data-table" *ngIf="loans.length > 0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th *ngIf="auth.isAdminOrLibrarian()">Reader</th>
+              <th>Book</th>
+              <th>Loan Date</th>
+              <th>Due Date</th>
+              <th>Return Date</th>
+              <th>Status</th>
+              <th *ngIf="auth.isAdminOrLibrarian()">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of loans; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td *ngIf="auth.isAdminOrLibrarian()">
+                <div class="user-cell">
+                  <div class="avatar-xs">{{ l.userName?.charAt(0)?.toUpperCase() }}</div>
+                  {{ l.userName }}
+                </div>
+              </td>
+              <td>
+                <div class="book-cell">
+                  <strong>{{ l.book?.title || ('Book #' + l.book?.bookId) }}</strong>
+                  <span class="book-author-sm">{{ l.book?.author }}</span>
+                </div>
+              </td>
+              <td>{{ l.loanDate || '—' }}</td>
+              <td>
+                <span [class.overdue-text]="l.status === 'Overdue'">{{ l.dueDate || '—' }}</span>
+              </td>
+              <td>{{ l.returnDate || '—' }}</td>
+              <td><span class="badge" [ngClass]="statusClass(l.status)">{{ l.status || 'Active' }}</span></td>
+              <td *ngIf="auth.isAdminOrLibrarian()">
+                <div class="action-btns">
+                  <button class="btn btn-secondary btn-sm" (click)="openEdit(l)">✏️ Update</button>
+                  <button class="btn btn-danger btn-sm" (click)="delete(l)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Loan Modal (Admin/Librarian) -->
+<div class="modal-overlay" *ngIf="showModal && !editingLoan" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><h3>📋 Create New Loan</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="alert alert-info">
+        ℹ️ Create a loan when a reader physically takes a book from the library.
+      </div>
+      <div class="form-group">
+        <label>Reader User ID *</label>
+        <input type="number" class="form-control" [class.is-invalid]="formErrors.userId" [(ngModel)]="loanForm.userId" placeholder="Enter the reader's user ID">
+        <span class="field-error" *ngIf="formErrors.userId">{{ formErrors.userId }}</span>
+      </div>
+      <div class="form-group">
+        <label>Book Lookup (by ISBN)</label>
+        <div class="lookup-input">
+          <input type="text" class="form-control" [(ngModel)]="loanForm.isbnQuery" placeholder="Enter Book ISBN (e.g. 978-...)">
+          <button class="btn btn-secondary" (click)="lookupBook()" [disabled]="lookingUpBook">
+            {{ lookingUpBook ? '⌛' : '🔍 Lookup' }}
+          </button>
+        </div>
+        <div class="book-preview-small glass-card" *ngIf="foundBook">
+          <div class="preview-icon">📚</div>
+          <div class="preview-info">
+            <strong>{{ foundBook.title }}</strong>
+            <span>{{ foundBook.author }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Book ID *</label>
+        <input type="number" class="form-control" [class.is-invalid]="formErrors.bookId" [(ngModel)]="loanForm.bookId" placeholder="Enter book ID or use ISBN lookup" [readonly]="!!foundBook">
+        <span class="field-error" *ngIf="formErrors.bookId">{{ formErrors.bookId }}</span>
+      </div>
+      <div class="form-group">
+        <label>Due Date *</label>
+        <input type="date" class="form-control" [class.is-invalid]="formErrors.dueDate" [(ngModel)]="loanForm.dueDate">
+        <span class="field-error" *ngIf="formErrors.dueDate">{{ formErrors.dueDate }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">📋 Create Loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Loan Modal (Admin/Librarian) -->
+<div class="modal-overlay" *ngIf="showModal && editingLoan" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>✏️ Update Loan — {{ editingLoan.book?.title || 'Loan #' + editingLoan.loanId }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" [(ngModel)]="loanForm.loanStatus">
+          <option value="Active">✅ Active</option>
+          <option value="Overdue">⚠️ Overdue</option>
+          <option value="Returned">📦 Returned</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Return Date</label>
+        <input type="date" class="form-control" [(ngModel)]="loanForm.returnDate">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">💾 Update Loan</button>
+    </div>
+  </div>
+</div>

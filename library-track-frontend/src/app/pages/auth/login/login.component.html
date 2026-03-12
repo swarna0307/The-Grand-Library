@@ -1,0 +1,51 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-branding">
+      <div class="brand-logo">🏛️</div>
+      <h2>The Grand Library</h2>
+      <p>Enter our sanctuary of knowledge. Sign in to manage your collection and reading journey.</p>
+      <div class="auth-features">
+        <div class="auth-feat"><span>📜</span> Access Rare Collections</div>
+        <div class="auth-feat"><span>🗓️</span> Book Community Spaces</div>
+        <div class="auth-feat"><span>📖</span> Track Your Personal Growth</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card glass-card">
+      <div class="auth-header">
+        <a routerLink="/" class="back-link">← Return to Main Entrance</a>
+        <h1>Welcome Back, Member</h1>
+        <p>Sign in to your library portal</p>
+      </div>
+
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" class="form-control" [(ngModel)]="username" name="username"
+                 placeholder="Enter your member ID" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control" [(ngModel)]="password" name="password"
+                 placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary login-btn" [disabled]="loading">
+          <span *ngIf="!loading">🗝️ Enter the Library</span>
+          <span *ngIf="loading">Opening doors...</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <span>Not a member yet?</span>
+        <a routerLink="/register">Register as a member →</a>
+      </div>
+
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,158 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-container" style="margin-top: 64px;">
+      <div class="loading" *ngIf="loading">Loading dashboard...</div>
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <div *ngIf="!loading && !error" class="fade-in">
+
+        <!-- HEADER -->
+        <div class="dash-header">
+          <div>
+            <div class="greeting">{{ getGreeting() }}, {{ auth.getUsername() }}!</div>
+            <h1>{{ roleTitle }}</h1>
+            <p class="time-display">{{ currentTime | date:'EEEE, MMMM d &bull; h:mm:ss a' }}</p>
+          </div>
+          <div class="role-badge-large" [ngClass]="auth.getRole().toLowerCase()">
+            {{ auth.getRole() }} • ID: {{ auth.getUserId() }}
+          </div>
+        </div>
+
+        <!-- ════════════ ADMIN / LIBRARIAN DASHBOARD ════════════ -->
+        <ng-container *ngIf="auth.isAdminOrLibrarian()">
+
+          <!-- STATS -->
+          <div class="stats-grid">
+            <div class="stat-card glass-card primary">
+              <div class="stat-icon books">📚</div>
+              <div class="stat-content">
+                <h3>Total Books</h3>
+                <div class="stat-value">{{ dashboard?.totalBooks || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card success">
+              <div class="stat-icon categories">🗂️</div>
+              <div class="stat-content">
+                <h3>Categories</h3>
+                <div class="stat-value">{{ dashboard?.totalCategories || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card warning">
+              <div class="stat-icon loans">📋</div>
+              <div class="stat-content">
+                <h3>Active Loans</h3>
+                <div class="stat-value">{{ dashboard?.totalLoans || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card danger">
+              <div class="stat-icon reservations">🔖</div>
+              <div class="stat-content">
+                <h3>Reservations</h3>
+                <div class="stat-value">{{ dashboard?.totalReservations || 0 }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHARTS -->
+          <div class="charts-grid">
+            <div class="glass-card chart-card" *ngIf="dashboard?.booksPerCategory">
+              <h3>📊 Books Per Category</h3>
+              <div class="bar-chart">
+                <div class="bar-row" *ngFor="let key of booksPerCategoryKeys">
+                  <div class="bar-label">{{ key }}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" [style.width.%]="(dashboard!.booksPerCategory![key] / (dashboard?.totalBooks || 1)) * 100"></div>
+                  </div>
+                  <div class="bar-value">{{ dashboard?.booksPerCategory?.[key] }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card chart-card" *ngIf="dashboard?.booksByAvailability">
+              <h3>📈 Book Availability</h3>
+              <div class="avail-list">
+                <div class="avail-item" *ngFor="let key of availabilityKeys">
+                  <div class="avail-dot" [ngClass]="'dot-' + getAvailabilityClass(key)"></div>
+                  <div class="avail-info">
+                    <span class="avail-name">{{ key }}</span>
+                    <span class="badge" [ngClass]="'badge-' + getAvailabilityClass(key)">{{ dashboard?.booksByAvailability?.[key] }}</span>
+                  </div>
+                  <div class="avail-bar">
+                    <div class="avail-fill" [ngClass]="'fill-' + getAvailabilityClass(key)"
+                         [style.width.%]="(dashboard!.booksByAvailability![key] / (dashboard?.totalBooks || 1)) * 100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+          <div class="glass-card quick-actions">
+            <h3>⚡ Quick Actions</h3>
+            <div class="actions-grid">
+              <a routerLink="/books"    class="action-btn"><span>📖</span><span>Manage Books</span></a>
+              <a routerLink="/categories" class="action-btn"><span>🗂️</span><span>Categories</span></a>
+              <a routerLink="/loans"    class="action-btn"><span>📋</span><span>Manage Loans</span></a>
+              <a routerLink="/reservations" class="action-btn"><span>🔖</span><span>Reservations</span></a>
+              <a routerLink="/reading-progress" class="action-btn"><span>📈</span><span>Reading Progress</span></a>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- ════════════ READER DASHBOARD ════════════ -->
+        <ng-container *ngIf="auth.isReader()">
+          <div class="stats-grid">
+            <div class="stat-card glass-card primary">
+              <div class="stat-icon loans">📋</div>
+              <div class="stat-content">
+                <h3>My Loans</h3>
+                <div class="stat-value">{{ dashboard?.totalLoans || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card warning">
+              <div class="stat-icon reservations">🔖</div>
+              <div class="stat-content">
+                <h3>My Reservations</h3>
+                <div class="stat-value">{{ dashboard?.totalReservations || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card success">
+              <div class="stat-icon books">📚</div>
+              <div class="stat-content">
+                <h3>Books Available</h3>
+                <div class="stat-value">{{ dashboard?.totalBooks || 0 }}</div>
+              </div>
+            </div>
+            <div class="stat-card glass-card danger">
+              <div class="stat-icon categories">📈</div>
+              <div class="stat-content">
+                <h3>Categories</h3>
+                <div class="stat-value">{{ dashboard?.totalCategories || 0 }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card quick-actions">
+            <h3>🚀 What would you like to do?</h3>
+            <div class="actions-grid">
+              <a routerLink="/books"            class="action-btn featured"><span>📖</span><span>Browse Books</span></a>
+              <a routerLink="/loans"            class="action-btn"><span>📋</span><span>My Loans</span></a>
+              <a routerLink="/reservations"     class="action-btn"><span>🔖</span><span>My Reservations</span></a>
+              <a routerLink="/reading-progress" class="action-btn"><span>📈</span><span>Track Reading</span></a>
+            </div>
+          </div>
+          <div class="glass-card reading-tip">
+            <div class="tip-icon">💡</div>
+            <div>
+              <h4>Reading Tip</h4>
+              <p>Track your reading progress to stay motivated. Update your current page after each session!</p>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</div>
+
