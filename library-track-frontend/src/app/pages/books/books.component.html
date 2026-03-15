@@ -13,8 +13,14 @@
           </p>
         </div>
         <div class="header-actions">
-          <input class="search-input" type="text" placeholder="🔍 Search title or author..."
+          <input class="search-input" type="text" placeholder="🔍 Search title, author, or ISBN..."
                  [(ngModel)]="searchTerm" (input)="applySearch()">
+          <select class="sort-select" [(ngModel)]="sortBy" (change)="applySort()">
+             <option value="titleAsc">Title (A-Z)</option>
+             <option value="titleDesc">Title (Z-A)</option>
+             <option value="authorAsc">Author (A-Z)</option>
+             <option value="authorDesc">Author (Z-A)</option>
+          </select>
           <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
             ➕ Add Book
           </button>
@@ -147,8 +153,9 @@
         <span class="field-error" *ngIf="formErrors.author">{{ formErrors.author }}</span>
       </div>
       <div class="form-group">
-        <label>ISBN</label>
-        <input class="form-control" [(ngModel)]="form.isbn" placeholder="ISBN (optional)">
+        <label>ISBN *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.isbn" [(ngModel)]="form.isbn" placeholder="ISBN">
+        <span class="field-error" *ngIf="formErrors.isbn">{{ formErrors.isbn }}</span>
       </div>
       <div class="form-group">
         <label>Category *</label>

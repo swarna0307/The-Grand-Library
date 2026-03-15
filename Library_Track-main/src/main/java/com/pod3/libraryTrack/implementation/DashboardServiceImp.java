@@ -74,11 +74,18 @@ public class DashboardServiceImp implements DashboardService {
             booksByAvailability.put(status, booksByAvailability.getOrDefault(status, 0L) + 1);
         }
 
+        long activeReservations = reservations.stream()
+                .filter(r -> r.getStatus() == com.pod3.libraryTrack.constants.ReservationStatus.Active)
+                .count();
+        long activeLoans = loans.stream()
+                .filter(l -> l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Active || l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Overdue)
+                .count();
+
         DashboardDto dto = DashboardDto.builder()
                 .totalBooks(bookRepo.count())
                 .totalCategories(categoryRepo.count())
-                .totalReservations((long) reservations.size())
-                .totalLoans((long) loans.size())
+                .totalReservations(activeReservations)
+                .totalLoans(activeLoans)
                 .booksPerCategory(booksPerCategory)
                 .booksByAvailability(booksByAvailability)
                 .build();
@@ -124,11 +131,18 @@ public class DashboardServiceImp implements DashboardService {
             booksByAvailability.put(status, booksByAvailability.getOrDefault(status, 0L) + 1);
         }
 
+        long activeReservations = reservations.stream()
+                .filter(r -> r.getStatus() == com.pod3.libraryTrack.constants.ReservationStatus.Active)
+                .count();
+        long activeLoans = loans.stream()
+                .filter(l -> l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Active || l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Overdue)
+                .count();
+
         DashboardDto dto = DashboardDto.builder()
                 .totalBooks(bookRepo.count())
                 .totalCategories(categoryRepo.count())
-                .totalReservations((long) reservations.size())
-                .totalLoans((long) loans.size())
+                .totalReservations(activeReservations)
+                .totalLoans(activeLoans)
                 .booksPerCategory(booksPerCategory)
                 .booksByAvailability(booksByAvailability)
                 .build();

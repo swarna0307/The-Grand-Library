@@ -116,21 +116,7 @@
   }
 }
 
-.quick-actions {
-  padding: 24px; margin-bottom: 24px;
-  h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-  .actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;
-    .action-btn {
-      display: flex; align-items: center; gap: 12px; padding: 16px 20px;
-      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px;
-      font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer;
-      text-decoration: none; transition: all 0.3s ease;
-      &:hover { background: rgba(var(--accent-rgb), 0.1); border-color: var(--accent); color: var(--accent); transform: translateY(-4px); box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2); }
-      &.featured { border-color: rgba(245,158,11,0.4); color: var(--accent); background: rgba(245,158,11,0.08); }
-      span:first-child { font-size: 20px; }
-    }
-  }
-}
+
 
 .reading-tip {
   padding: 24px; display: flex; align-items: flex-start; gap: 20px;

@@ -92,6 +92,8 @@ public class ReservationServiceImp implements ReservationService {
             throw new AccessDeniedException("Unauthorized role");
         }
 
+        checkAndUpdateExpiredReservations(reservations);
+
         return reservations.stream().map(this::mapToDto).toList();
     }
 
@@ -102,6 +104,8 @@ public class ReservationServiceImp implements ReservationService {
 
         User currentUser = getCurrentUser();
         String roleName = currentUser.getRole().getName();
+
+        checkAndUpdateExpiredReservation(reservation);
 
         if (isAdminOrLibrarian(roleName) || reservation.getUser().getUserId().equals(currentUser.getUserId())) {
             return mapToDto(reservation);
@@ -189,6 +193,40 @@ public class ReservationServiceImp implements ReservationService {
             return "Reservation deletion completed";
         }
         throw new AccessDeniedException("You do not have permission to delete this reservation");
+    }
+
+    private void checkAndUpdateExpiredReservations(List<Reservation> reservations) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        boolean updated = false;
+        for (Reservation res : reservations) {
+            if (res.getStatus() == ReservationStatus.Active && res.getExpiryDate() != null && res.getExpiryDate().isBefore(today)) {
+                res.setStatus(ReservationStatus.Cancelled);
+                Book book = res.getBook();
+                if (book != null && book.getAvailabilityStatus() == AvailabilityStatus.Reserved) {
+                    book.setAvailabilityStatus(AvailabilityStatus.Available);
+                    bookRepository.save(book);
+                }
+                updated = true;
+                log.info("Dynamically marked Reservation ID: {} as Cancelled", res.getReservationId());
+            }
+        }
+        if (updated) {
+            reservationRepository.saveAll(reservations);
+        }
+    }
+
+    private void checkAndUpdateExpiredReservation(Reservation res) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (res.getStatus() == ReservationStatus.Active && res.getExpiryDate() != null && res.getExpiryDate().isBefore(today)) {
+            res.setStatus(ReservationStatus.Cancelled);
+            Book book = res.getBook();
+            if (book != null && book.getAvailabilityStatus() == AvailabilityStatus.Reserved) {
+                book.setAvailabilityStatus(AvailabilityStatus.Available);
+                bookRepository.save(book);
+            }
+            reservationRepository.save(res);
+            log.info("Dynamically marked Reservation ID: {} as Cancelled", res.getReservationId());
+        }
     }
 
     private ReservationDto mapToDto(Reservation reservation) {

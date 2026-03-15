@@ -10,9 +10,17 @@
           <p class="page-subtitle" *ngIf="auth.isAdminOrLibrarian()">Create and manage book categories</p>
           <p class="page-subtitle" *ngIf="auth.isReader()">Browse all book categories</p>
         </div>
-        <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
-          ➕ New Category
-        </button>
+        <div class="header-actions">
+          <input class="search-input" type="text" placeholder="🔍 Search categories..."
+                 [(ngModel)]="searchTerm" (input)="applySearch()">
+          <select class="sort-select" [(ngModel)]="sortBy" (change)="applySort()">
+             <option value="nameAsc">Sort by Name (A-Z)</option>
+             <option value="nameDesc">Sort by Name (Z-A)</option>
+          </select>
+          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
+            ➕ New Category
+          </button>
+        </div>
       </div>
 
       <div class="alert alert-success" *ngIf="success">✅ {{ success }}</div>
@@ -20,14 +28,16 @@
       <div class="loading" *ngIf="loading">Loading categories...</div>
 
       <div *ngIf="!loading">
-        <div class="empty-state glass-card" *ngIf="categories.length === 0">
+        <div class="empty-state glass-card" *ngIf="filteredCategories.length === 0">
           <div class="empty-icon">🗂️</div>
           <h3>No categories yet</h3>
           <p *ngIf="auth.isAdminOrLibrarian()">Click "New Category" to create the first one.</p>
         </div>
 
-        <div class="categories-grid" *ngIf="categories.length > 0">
-          <div class="category-card glass-card" *ngFor="let c of categories">
+        <div class="categories-grid" *ngIf="filteredCategories.length > 0">
+          <div class="category-card glass-card" *ngFor="let c of filteredCategories" 
+               [routerLink]="['/books']" [queryParams]="{categoryId: c.categoryId}" 
+               style="cursor: pointer; transition: transform 0.2s;">
             <div class="category-card-header">
               <div class="category-icon">🗂️</div>
               <div class="category-meta">
@@ -35,14 +45,14 @@
                 <p class="category-desc">{{ c.description || 'No description provided.' }}</p>
               </div>
             </div>
-            <div class="category-card-footer" *ngIf="auth.isAdminOrLibrarian()">
+            <div class="category-card-footer" *ngIf="auth.isAdminOrLibrarian()" (click)="$event.stopPropagation()">
               <button class="btn btn-secondary btn-sm" (click)="openEdit(c)">✏️ Edit</button>
               <button class="btn btn-danger btn-sm"    (click)="delete(c)">🗑️ Delete</button>
             </div>
             <div class="category-card-footer" *ngIf="auth.isReader()">
-              <a class="btn btn-secondary btn-sm" [routerLink]="['/books']" [queryParams]="{categoryId: c.categoryId}">
+              <span class="btn btn-secondary btn-sm">
                 📖 View Books
-              </a>
+              </span>
             </div>
           </div>
         </div>

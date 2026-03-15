@@ -69,6 +69,9 @@ public class LoanServiceImp implements LoanService {
 		} else {
 			throw new AccessDeniedException("Unauthorized role");
 		}
+		
+		checkAndUpdateOverdueLoans(loans);
+		
 		return loans.stream().map(this::mapToDto).toList();
 	}
 
@@ -78,6 +81,8 @@ public class LoanServiceImp implements LoanService {
 
 		User currentUser = getCurrentUser();
 		String roleName = currentUser.getRole().getName();
+
+		checkAndUpdateOverdueLoan(loan);
 
 		if (isAdminOrLibrarian(roleName) || loan.getUser().getUserId().equals(currentUser.getUserId())) {
 			return mapToDto(loan);
@@ -92,16 +97,32 @@ public class LoanServiceImp implements LoanService {
 
 		if (loan.getBook() != null)
 			loanTemp.setBook(loan.getBook());
-		if (loan.getDueDate() != null)
+		if (loan.getDueDate() != null) {
 			loanTemp.setDueDate(loan.getDueDate());
+			// If it was overdue but the new due date is >= today, auto-set to active
+			java.time.LocalDate today = java.time.LocalDate.now();
+			if (loanTemp.getStatus() == LoanStatus.Overdue && !loanTemp.getDueDate().isBefore(today)) {
+				if (loan.getStatus() == LoanStatus.Overdue) {
+					loan.setStatus(LoanStatus.Active); // override client's status if they sent overdue
+				}
+				loanTemp.setStatus(LoanStatus.Active);
+				log.info("Due date extended. Auto-reverting status to Active for Loan ID: {}", loanId);
+			}
+		}
 		if (loan.getLoanDate() != null)
 			loanTemp.setLoanDate(loan.getLoanDate());
-		if (loan.getReturnDate() != null)
+		if (loan.getReturnDate() != null) {
 			loanTemp.setReturnDate(loan.getReturnDate());
+			// Auto set status to Returned if a return date is added
+			if (loan.getStatus() != LoanStatus.Returned) {
+				loan.setStatus(LoanStatus.Returned);
+			}
+			log.info("Return date entered. Auto-setting status to Returned for Loan ID: {}", loanId);
+		}
 		if (loan.getStatus() != null) {
 			log.info("Updating Loan ID: {} status from {} to {}", loanId, loanTemp.getStatus(), loan.getStatus());
 			loanTemp.setStatus(loan.getStatus());
-			
+
 			// When loan is returned, free the book
 			if (loan.getStatus() == LoanStatus.Returned) {
 				Book book = loanTemp.getBook();
@@ -140,6 +161,38 @@ public class LoanServiceImp implements LoanService {
 		loanRepo.delete(loan);
 		log.info("Loan ID: {} deleted successfully", loanId);
 		return "Loan Deleted";
+	}
+	
+	private void checkAndUpdateOverdueLoans(List<Loan> loans) {
+		java.time.LocalDate today = java.time.LocalDate.now();
+		boolean updated = false;
+		for (Loan loan : loans) {
+			if (loan.getStatus() == LoanStatus.Active && loan.getDueDate() != null && loan.getDueDate().isBefore(today)) {
+				loan.setStatus(LoanStatus.Overdue);
+				updated = true;
+				log.info("Dynamically marked Loan ID: {} as Overdue", loan.getLoanId());
+			} else if (loan.getStatus() == LoanStatus.Overdue && loan.getDueDate() != null && !loan.getDueDate().isBefore(today)) {
+				loan.setStatus(LoanStatus.Active);
+				updated = true;
+				log.info("Dynamically marked Loan ID: {} back to Active due to extended date", loan.getLoanId());
+			}
+		}
+		if (updated) {
+			loanRepo.saveAll(loans);
+		}
+	}
+
+	private void checkAndUpdateOverdueLoan(Loan loan) {
+		java.time.LocalDate today = java.time.LocalDate.now();
+		if (loan.getStatus() == LoanStatus.Active && loan.getDueDate() != null && loan.getDueDate().isBefore(today)) {
+			loan.setStatus(LoanStatus.Overdue);
+			loanRepo.save(loan);
+			log.info("Dynamically marked Loan ID: {} as Overdue", loan.getLoanId());
+		} else if (loan.getStatus() == LoanStatus.Overdue && loan.getDueDate() != null && !loan.getDueDate().isBefore(today)) {
+			loan.setStatus(LoanStatus.Active);
+			loanRepo.save(loan);
+			log.info("Dynamically marked Loan ID: {} back to Active due to extended date", loan.getLoanId());
+		}
 	}
 
 	private LoanDto mapToDto(Loan loan) {

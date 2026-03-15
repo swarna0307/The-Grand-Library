@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservationService } from '../../core/services/reservation.service';
 import { BookService } from '../../core/services/book.service';
@@ -43,10 +44,20 @@ export class ReservationsComponent implements OnInit {
   constructor(
     public  auth:       AuthService,
     private resService: ReservationService,
-    private bookSvc:    BookService
+    private bookSvc:    BookService,
+    private route:      ActivatedRoute
   ) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { 
+    this.load(); 
+    this.route.queryParams.subscribe(params => {
+      if (params['isbn']) {
+        this.openCreate();
+        this.isbnQuery = params['isbn'];
+        this.lookupBook();
+      }
+    });
+  }
 
   // ── Load reservations ─────────────────────────────────────
   load(): void {

@@ -17,6 +17,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 	@Modifying
 	@Transactional
 	void deleteByBookBookId(Long bookId);
-
+	
 	boolean existsByBookBookIdAndStatusIn(Long bookId, List<LoanStatus> statuses);
+
+	boolean existsByUserUsernameAndBookBookIdAndStatusIn(String username, Long bookId, List<LoanStatus> statuses);
 }

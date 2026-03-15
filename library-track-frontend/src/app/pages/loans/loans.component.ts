@@ -4,6 +4,8 @@ import { LoanService } from '../../core/services/loan.service';
 import { LoanDto, Book } from '../../models/models';
 import { BookService } from '../../core/services/book.service';
 
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-loans',
   templateUrl: './loans.component.html',
@@ -25,10 +27,20 @@ export class LoansComponent implements OnInit {
   constructor(
     public auth: AuthService, 
     private loanService: LoanService,
-    private bookService: BookService
+    private bookService: BookService,
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit() { this.load(); }
+  ngOnInit() { 
+    this.load(); 
+    this.route.queryParams.subscribe(params => {
+      if (params['isbn']) {
+        this.openAdd();
+        this.loanForm.isbnQuery = params['isbn'];
+        this.lookupBook();
+      }
+    });
+  }
 
   load() {
     this.loading = true;

@@ -20,5 +20,6 @@ public class ReadingProgressDto {
 	private Integer totalPages;
 	private Double percentageComplete; 
 	private Date lastUpdated;
+	private boolean isHistory;
 	
 }

@@ -61,6 +61,7 @@ export interface ReadingProgressDto {
   totalPages?: number;
   percentageComplete?: number;
   lastUpdated?: string;
+  isHistory?: boolean;
 }
 
 export interface DashboardDto {

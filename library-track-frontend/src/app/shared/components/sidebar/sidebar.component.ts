@@ -37,11 +37,12 @@ export class SidebarComponent implements OnInit {
         { label: 'Reading Progress', icon: '📈', route: '/reading-progress' }
       );
       if (role === 'ADMIN') {
-        items.push({ label: 'Manage Users', icon: '👥', route: '/users' });
+        items.push({ label: 'Users', icon: '👥', route: '/users' });
       }
     } else {
       // READER
       items.push(
+        { label: 'Categories',       icon: '🗂️', route: '/categories' },
         { label: 'Browse Books',     icon: '📖', route: '/books' },
         { label: 'My Loans',         icon: '📋', route: '/loans' },
         { label: 'My Reservations',  icon: '🔖', route: '/reservations' },

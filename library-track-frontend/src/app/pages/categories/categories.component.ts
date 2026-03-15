@@ -11,6 +11,9 @@ import { Category, ResponseStructure } from '../../models/models';
 })
 export class CategoriesComponent implements OnInit {
   categories: Category[] = [];
+  filteredCategories: Category[] = [];
+  searchTerm = '';
+  sortBy = 'nameAsc';
   loading = false;
   error = '';
   success = '';
@@ -27,9 +30,32 @@ export class CategoriesComponent implements OnInit {
   load() {
     this.loading = true;
     this.catService.getAll().subscribe({
-      next: r => { this.categories = r.data; this.loading = false; },
+      next: r => { 
+        this.categories = r.data; 
+        this.applySearch();
+        this.loading = false; 
+      },
       error: (e) => { this.error = e.error?.message || 'Could not load categories.'; this.loading = false; }
     });
+  }
+
+  applySearch() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredCategories = term
+      ? this.categories.filter(c => 
+          c.name?.toLowerCase().includes(term) || 
+          c.description?.toLowerCase().includes(term)
+        )
+      : [...this.categories];
+    this.applySort();
+  }
+
+  applySort() {
+    if (this.sortBy === 'nameAsc') {
+      this.filteredCategories.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else if (this.sortBy === 'nameDesc') {
+      this.filteredCategories.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+    }
   }
 
   openAdd() {

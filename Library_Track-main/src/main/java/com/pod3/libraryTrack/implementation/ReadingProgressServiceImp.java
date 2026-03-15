@@ -17,6 +17,10 @@ import com.pod3.libraryTrack.model.User;
 import com.pod3.libraryTrack.repository.BookRepository;
 import com.pod3.libraryTrack.repository.ReadingProgressRepository;
 import com.pod3.libraryTrack.repository.UserRepository;
+import com.pod3.libraryTrack.repository.LoanRepository;
+import com.pod3.libraryTrack.repository.ReservationRepository;
+import com.pod3.libraryTrack.constants.LoanStatus;
+import com.pod3.libraryTrack.constants.ReservationStatus;
 
 import com.pod3.libraryTrack.service.ReadingProgressService;
 
@@ -32,6 +36,8 @@ public class ReadingProgressServiceImp implements ReadingProgressService {
     private final ReadingProgressRepository readRepo;
     private final UserRepository userRepo;
     private final BookRepository bookRepo;
+    private final LoanRepository loanRepo;
+    private final ReservationRepository reservationRepo;
 
     @Override
     @Transactional
@@ -104,6 +110,15 @@ public class ReadingProgressServiceImp implements ReadingProgressService {
             throw new AccessDeniedException("Only Readers can update");
         }
 
+        boolean hasActiveLoan = loanRepo.existsByUserUsernameAndBookBookIdAndStatusIn(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), List.of(LoanStatus.Active, LoanStatus.Overdue));
+        boolean hasActiveReservation = reservationRepo.existsByUserUsernameAndBookBookIdAndStatus(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), ReservationStatus.Active);
+
+        if (!hasActiveLoan && !hasActiveReservation) {
+            throw new AccessDeniedException("This reading progress is in history state and cannot be updated. Please loan or reserve the book again.");
+        }
+
         if (readingProgress.getBook() != null)
             progress.setBook(readingProgress.getBook());
         if (readingProgress.getPercentageComplete() != null)
@@ -140,6 +155,13 @@ public class ReadingProgressServiceImp implements ReadingProgressService {
             ? rawUsername.substring(0, 1).toUpperCase() + rawUsername.substring(1) 
             : rawUsername;
 
+        boolean hasActiveLoan = loanRepo.existsByUserUsernameAndBookBookIdAndStatusIn(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), List.of(LoanStatus.Active, LoanStatus.Overdue));
+        boolean hasActiveReservation = reservationRepo.existsByUserUsernameAndBookBookIdAndStatus(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), ReservationStatus.Active);
+        
+        boolean isHistory = !hasActiveLoan && !hasActiveReservation;
+
         return ReadingProgressDto.builder()
                 .progressId(progress.getProgressId())
                 .userId(progress.getUser().getUserId())
@@ -149,6 +171,7 @@ public class ReadingProgressServiceImp implements ReadingProgressService {
                 .totalPages(progress.getTotalPages())
                 .percentageComplete(progress.getPercentageComplete())
                 .lastUpdated(progress.getLastUpdated())
+                .isHistory(isHistory)
                 .build();
     }
 

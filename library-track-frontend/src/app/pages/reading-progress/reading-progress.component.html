@@ -47,11 +47,13 @@
           <div class="progress-card glass-card" *ngFor="let p of progresses">
             <div class="progress-header">
               <div class="book-info">
-                <div class="book-title-p">{{ p.book?.title || ('Book #' + p.book?.bookId) }}</div>
+                <div class="book-title-p">{{ p.book?.title || ('Book #' + p.book?.bookId) }}
+                  <span *ngIf="p.isHistory" class="badge bg-secondary" style="font-size: 0.7em; margin-left: 8px;">History</span>
+                </div>
                 <div class="book-author-sm">{{ p.book?.author }}</div>
               </div>
               <div class="p-actions">
-                <button class="btn btn-secondary btn-sm btn-icon" (click)="openEdit(p)" title="Update">✏️</button>
+                <button *ngIf="!p.isHistory" class="btn btn-secondary btn-sm btn-icon" (click)="openEdit(p)" title="Update">✏️</button>
                 <button class="btn btn-danger btn-sm btn-icon" (click)="delete(p)" title="Delete">🗑️</button>
               </div>
             </div>
@@ -63,7 +65,7 @@
               <div class="progress-stats">
                 <span>📄 {{ p.pagesRead || 0 }} pages read</span>
                 <span class="pct" [class.done]="getPercent(p) >= 100">
-                  {{ getPercent(p) >= 100 ? '✅ Finished!' : getPercent(p) + '% complete' }}
+                  {{ getPercent(p) >= 100 ? '✅ Finished!' : (getPercent(p) | number:'1.0-2') + '% complete' }}
                 </span>
               </div>
             </div>
@@ -115,7 +117,7 @@
                       <div class="progress-bar-inner" [style.width.%]="getPercent(p)" [class.done]="getPercent(p) >= 100"></div>
                     </div>
                     <div class="pct" [class.done]="getPercent(p) >= 100" style="font-size: 11px; font-weight: 700;">
-                      {{ getPercent(p) >= 100 ? '✅ Finished' : (getPercent(p) | number:'1.0-1') + '%' }}
+                      {{ getPercent(p) >= 100 ? '✅ Finished' : (getPercent(p) | number:'1.0-2') + '%' }}
                     </div>
                   </div>
                 </td>

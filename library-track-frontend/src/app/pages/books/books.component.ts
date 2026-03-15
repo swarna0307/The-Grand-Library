@@ -19,6 +19,7 @@ export class BooksComponent implements OnInit {
   selectedBook: Book | null = null;
 
   searchTerm = '';
+  sortBy = 'titleAsc';
   loading = false;
   error = '';
   success = '';
@@ -78,8 +79,25 @@ export class BooksComponent implements OnInit {
   applySearch() {
     const term = this.searchTerm.toLowerCase();
     this.filtered = term
-      ? this.books.filter(b => b.title?.toLowerCase().includes(term) || b.author?.toLowerCase().includes(term))
+      ? this.books.filter(b => 
+          b.title?.toLowerCase().includes(term) || 
+          b.author?.toLowerCase().includes(term) ||
+          b.isbn?.toLowerCase().includes(term)
+        )
       : [...this.books];
+    this.applySort();
+  }
+
+  applySort() {
+    if (this.sortBy === 'titleAsc') {
+      this.filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    } else if (this.sortBy === 'titleDesc') {
+      this.filtered.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+    } else if (this.sortBy === 'authorAsc') {
+      this.filtered.sort((a, b) => (a.author || '').localeCompare(b.author || ''));
+    } else if (this.sortBy === 'authorDesc') {
+      this.filtered.sort((a, b) => (b.author || '').localeCompare(a.author || ''));
+    }
   }
 
   openDetail(b: Book) { this.selectedBook = b; this.showDetail = true; }
@@ -107,6 +125,7 @@ export class BooksComponent implements OnInit {
     this.formErrors = {};
     if (!this.form.title?.trim()) this.formErrors.title = 'Title is required.';
     if (!this.form.author?.trim()) this.formErrors.author = 'Author is required.';
+    if (!this.form.isbn?.trim()) this.formErrors.isbn = 'ISBN is required.';
     if (!this.form.categoryId) this.formErrors.categoryId = 'Category is required.';
     return Object.keys(this.formErrors).length === 0;
   }
@@ -157,11 +176,11 @@ export class BooksComponent implements OnInit {
 
   reserveBook(b: Book) {
     this.closeDetail();
-    this.router.navigate(['/reservations'], { queryParams: { bookId: b.bookId } });
+    this.router.navigate(['/reservations'], { queryParams: { isbn: b.isbn } });
   }
 
   loanBook(b: Book) {
     this.closeDetail();
-    this.router.navigate(['/loans'], { queryParams: { bookId: b.bookId } });
+    this.router.navigate(['/loans'], { queryParams: { isbn: b.isbn } });
   }
 }
