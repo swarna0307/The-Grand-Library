@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="brand-icon">📚</span>
+    <span class="brand-text">The Grand Library</span>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-username">{{ auth.getUsername() }}</span>
+      <span class="role-chip" [ngClass]="'chip-' + auth.getRole().toLowerCase()">
+        {{ auth.getRole() }}
+      </span>
+    </div>
+
+    <!-- Profile Icon Button -->
+    <button class="profile-btn" (click)="profile.open()" title="My Profile">
+      <div class="avatar-sm">{{ initials }}</div>
+    </button>
+
+    <button class="logout-btn" (click)="logout()" title="Logout">
+      <span>⏻</span>
+      <span>Logout</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Profile Panel (shared component) -->
+<app-profile #profile></app-profile>
