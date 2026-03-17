@@ -1,0 +1,33 @@
+<aside class="sidebar" [class.collapsed]="collapsed" *ngIf="auth.isLoggedIn()">
+  <div class="sidebar-header">
+    <div class="logo" *ngIf="!collapsed">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text">LibraryTrack</span>
+    </div>
+    <button class="collapse-btn" (click)="toggleCollapse()">
+      {{ collapsed ? '▶' : '◀' }}
+    </button>
+  </div>
+
+  <div class="user-profile" *ngIf="!collapsed">
+    <div class="avatar">{{ auth.getUsername().charAt(0).toUpperCase() }}</div>
+    <div class="user-details">
+      <div class="user-name">{{ auth.getUsername() }}</div>
+      <div class="user-role">{{ roleLabel }}</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a *ngFor="let item of menuItems"
+       class="nav-item"
+       [class.active]="activeRoute === item.route"
+       (click)="navigate(item.route)">
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer" *ngIf="!collapsed">
+    <div class="version">v1.0.0 · Library System</div>
+  </div>
+</aside>

@@ -1,0 +1,65 @@
+.navbar {
+  position: fixed; top: 0; right: 0; left: 240px;
+  height: 64px; z-index: 200;
+  background: rgba(7, 18, 36, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  transition: left 0.3s ease;
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 8px;
+    .brand-icon { font-size: 22px; }
+    .brand-text { font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+      background: linear-gradient(90deg, #fff 40%, #f59e0b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    @media (max-width: 768px) { display: none; }
+  }
+
+  .nav-right {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .nav-user-info {
+    display: flex; align-items: center; gap: 8px;
+    @media (max-width: 500px) { display: none; }
+
+    .nav-username { font-size: 13px; font-weight: 600; }
+  }
+
+  .role-chip {
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    &.chip-admin     { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    &.chip-librarian { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+    &.chip-reader    { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  }
+
+  .profile-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 2px; border-radius: 50%;
+    transition: all 0.2s;
+    &:hover .avatar-sm { box-shadow: 0 0 0 3px rgba(245,158,11,0.4); }
+  }
+
+  .avatar-sm {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #0f172a;
+    transition: box-shadow 0.2s;
+  }
+
+  .logout-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px; padding: 7px 14px;
+    color: #f87171; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    &:hover { background: rgba(239,68,68,0.2); }
+  }
+}
