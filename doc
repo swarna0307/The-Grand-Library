@@ -1,0 +1,58 @@
+Books Per Category need to be changed.. 
+copies need to be added and books copies count should be decreased when someone takes a loan.
+*Categories
+
+-> search bar should be placed on the top.
+-> filter need to be added with names of the category
+-> sort option with ascending and descending orders
+
+*Books
+
+-> search should be on the top 
+-> filter needed to be added
+	- by category name
+	- availability status
+-> sort by
+	- total copies
+	- name
+-> in books dashboard it should be visible as no. of copies edit and delete.
+	after clicking it, it should show close, no. of copies, loan, edit for librarian and admin
+	for reader, it should show close, no.of copies, reserve
+-> if books are 0 means it should update as not available automatically. loans and reservations can't be accepted.
+
+*Loans
+
+-> filter needs to be added
+	-by status
+-> sort needs to be added
+	-by reader name(asc or desc)(for admin & librarian)
+	-by book name(asc or desc)
+	-by due date(asc or desc)
+-> search needs to be added(only for admin & librarian)
+	-by username
+	-by bookname
+	-by due date
+* Reservations
+-> filter needs to be added
+	-by status
+-> sort needs to be added
+	-by reader name(asc or desc)(for admin & librarian)
+	-by book name(asc or desc)
+	-by date(asc or desc)
+-> search needs to be added(only for admin & librarian)
+	-by username
+	-by bookname
+	-by date
+* Reading Progress
+-> filter needs to be added to see what books are in progress and what are completed.
+-> sort needs to be added 
+	-readername(for admin & librarian)
+	-bookname
+	-completion percentage
+-> search needs to be added (for admins and librarians)
+	-by readername
+	-by bookname
+
+* Users
+-> sort by username, registered date (for admin)
+-> filter by role and gender
