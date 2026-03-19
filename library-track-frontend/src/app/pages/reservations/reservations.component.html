@@ -16,13 +16,13 @@
                    [(ngModel)]="searchTerm" (input)="applyAll()">
           </div>
           <div class="filter-group">
-            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
-              <option value="" disabled selected hidden>Filter</option>
-              <option value="">All</option>
-              <option value="Pending">⏳ Pending</option>
-              <option value="Fulfilled">✅ Fulfilled</option>
-              <option value="Cancelled">❌ Cancelled</option>
-            </select>
+              <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
+                <option value="" disabled selected hidden>Filter</option>
+                <option value="">All</option>
+                <option value="Active">⏳ Active</option>
+                <option value="Fulfilled">✅ Fulfilled</option>
+                <option value="Cancelled">❌ Cancelled</option>
+              </select>
           </div>
           <div class="filter-group">
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">

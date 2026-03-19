@@ -51,7 +51,7 @@ export interface ReservationDto {
   book?: Book;
   reservedDate?: string;
   expiryDate?: string;
-  status?: 'Pending' | 'Active' | 'Cancelled' | 'Fulfilled';
+  status?: 'Active' | 'Cancelled' | 'Fulfilled';
 }
 
 export interface ReadingProgressDto {

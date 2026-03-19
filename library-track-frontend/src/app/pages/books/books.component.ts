@@ -47,14 +47,17 @@ export class BooksComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.catService.getAll().subscribe({ next: r => { this.categories = r.data; } });
+    this.catService.getAll().subscribe({ next: r => { 
+      this.categories = r.data; 
+      if (this.selectedCategoryId) this.applyAll();
+    } });
     this.route.queryParams.subscribe(params => {
-      if (params['categoryId']) {
-        this.selectedCategoryId = Number(params['categoryId']);
-        this.loadAll();
-      } else {
-        this.loadAll();
+      this.selectedCategoryId = params['categoryId'] ? Number(params['categoryId']) : null;
+      if (!this.selectedCategoryId) {
+         this.selectedCategory = null;
+         this.filterCategory = '';
       }
+      this.loadAll();
     });
   }
 
@@ -77,16 +80,13 @@ export class BooksComponent implements OnInit {
     }
 
     // Filter by category
-    if (this.filterCategory !== '') {
-      result = result.filter(b => b.category?.name === this.filterCategory);
-      this.selectedCategory = this.categories.find(c => c.name === this.filterCategory) || null;
-      this.selectedCategoryId = this.selectedCategory?.categoryId || null;
-    } else if (this.selectedCategoryId) {
-      // If we have a selectedCategoryId from the URL but filterCategory is empty,
-      // it means the user explicitly selected "All Categories" from the dropdown.
-      // We should clear the selected category to show all books.
-      this.selectedCategory = null;
-      this.selectedCategoryId = null;
+    if (this.selectedCategoryId) {
+      result = result.filter(b => b.category?.categoryId === this.selectedCategoryId);
+      // Try to sync display values if categories are loaded and not synced yet
+      if (this.categories.length > 0 && !this.selectedCategory) {
+        this.selectedCategory = this.categories.find(c => c.categoryId === this.selectedCategoryId) || null;
+        this.filterCategory = this.selectedCategory?.name || '';
+      }
     }
 
     // Search
@@ -123,6 +123,24 @@ export class BooksComponent implements OnInit {
     } else if (this.sortBy === 'copiesDesc') {
       this.filtered.sort((a, b) => (b.availableCopies ?? 0) - (a.availableCopies ?? 0));
     }
+  }
+
+  onFilterCategoryChange() {
+    if (this.filterCategory === '') {
+      this.selectedCategoryId = null;
+      this.selectedCategory = null;
+    } else {
+      this.selectedCategory = this.categories.find(c => c.name === this.filterCategory) || null;
+      this.selectedCategoryId = this.selectedCategory?.categoryId || null;
+    }
+    
+    // Update URL to reflect the new category (or remove it if cleared)
+    this.router.navigate(['/books'], { 
+      queryParams: { categoryId: this.selectedCategoryId || null }, 
+      queryParamsHandling: 'merge' 
+    });
+    
+    this.applyAll();
   }
 
   toggleFilterDropdown() {

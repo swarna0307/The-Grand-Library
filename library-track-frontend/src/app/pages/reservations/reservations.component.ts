@@ -29,7 +29,7 @@ export class ReservationsComponent implements OnInit {
   bookId = '';
   bookError = '';
 
-  selectedStatus = 'Pending';
+  selectedStatus = 'Active';
 
   // Filter / Sort / Search
   filterStatus = '';
@@ -125,7 +125,7 @@ export class ReservationsComponent implements OnInit {
 
   openReview(r: ReservationDto): void {
     this.editingRes = r;
-    this.selectedStatus = r.status || 'Pending';
+    this.selectedStatus = r.status || 'Active';
     this.error = '';
     this.showModal = true;
   }

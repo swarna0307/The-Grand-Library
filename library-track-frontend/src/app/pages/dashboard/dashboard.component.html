@@ -74,24 +74,7 @@
                 </div>
               </div>
             </div>
-            <div class="glass-card chart-card" *ngIf="dashboard?.booksByAvailability">
-              <h3>📈 Books Per Availability</h3>
-              <div class="avail-list">
-                <div class="avail-item" *ngFor="let key of availabilityKeys">
-                  <div class="avail-dot" [ngClass]="'dot-' + getAvailabilityClass(key)"></div>
-                  <div class="avail-info">
-                    <span class="avail-name">{{ key }}</span>
-                    <span class="badge" [ngClass]="'badge-' + getAvailabilityClass(key)">{{
-                      dashboard?.booksByAvailability?.[key] }}</span>
-                  </div>
-                  <div class="avail-bar">
-                    <div class="avail-fill" [ngClass]="'fill-' + getAvailabilityClass(key)"
-                      [style.width.%]="(dashboard!.booksByAvailability![key] / (dashboard?.totalBooks || 1)) * 100">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
 
 

@@ -53,9 +53,7 @@ export class DashboardComponent implements OnInit {
   get booksPerCategoryKeys(): string[] {
     return this.dashboard?.booksPerCategory ? Object.keys(this.dashboard.booksPerCategory) : [];
   }
-  get availabilityKeys(): string[] {
-    return this.dashboard?.booksByAvailability ? Object.keys(this.dashboard.booksByAvailability) : [];
-  }
+
   getGreeting(): string {
     const h = new Date().getHours();
     if (h < 12) return '☀️ Good morning';
@@ -66,11 +64,7 @@ export class DashboardComponent implements OnInit {
     const r = this.auth.getRole();
     return r === 'ADMIN' ? '🛡️ Administration' : r === 'LIBRARIAN' ? '📚 Library Management' : '📖 My Reading Space';
   }
-  getAvailabilityClass(key: string): string {
-    if (key.toLowerCase().includes('available')) return 'success';
-    if (key.toLowerCase().includes('borrowed')) return 'warning';
-    return 'danger';
-  }
+
   getRoleClass(r?: any): string {
     const name = r?.name || '';
     return name.includes('ADMIN') ? 'badge-danger' : name.includes('LIBRARIAN') ? 'badge-info' : 'badge-success';

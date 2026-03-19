@@ -17,7 +17,7 @@
         <div class="header-controls">
           <div class="filter-group">
             <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, book..."
-                   [(ngModel)]="searchTerm" (input)="applyAll()">
+              [(ngModel)]="searchTerm" (input)="applyAll()">
           </div>
           <div class="filter-group">
             <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
@@ -130,7 +130,7 @@
                 <td>{{ p.progressId }}</td>
                 <td>
                   <div class="user-cell">
-                    <div class="avatar-xs">{{ p.username?.charAt(0)?.toUpperCase() || '?' }}</div>
+
                     <span>{{ p.username || 'Unknown User' }}</span>
                   </div>
                 </td>

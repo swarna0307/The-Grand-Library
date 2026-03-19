@@ -39,7 +39,7 @@
               </div>
               <div class="filter-item">
                 <label>Category</label>
-                <select class="filter-select" [(ngModel)]="filterCategory" (change)="applyAll()">
+                <select class="filter-select" [(ngModel)]="filterCategory" (change)="onFilterCategoryChange()">
                   <option value="">All Categories</option>
                   <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
                 </select>
