@@ -97,11 +97,27 @@ export class UsersComponent implements OnInit {
   }
 
 
-  openAdd() { this.editingUser = null; this.userForm = { username: '', email: '', password: '', gender: '', phone: '', address: '', role: { name: 'ROLE_READER' } }; this.showModal = true; }
-  openEdit(u: UserDto) { this.editingUser = u; this.userForm = { username: u.username, email: u.email, gender: u.gender, phone: u.phone, address: u.address, role: u.role }; this.showModal = true; }
-  closeModal() { this.showModal = false; this.error = ''; }
+  formErrors: any = {};
+
+  openAdd() { this.formErrors = {}; this.editingUser = null; this.userForm = { username: '', email: '', password: '', gender: '', phone: '', address: '', role: { name: 'ROLE_READER' } }; this.showModal = true; }
+  openEdit(u: UserDto) { this.formErrors = {}; this.editingUser = u; this.userForm = { username: u.username, email: u.email, gender: u.gender, phone: u.phone, address: u.address, role: u.role }; this.showModal = true; }
+  closeModal() { this.showModal = false; this.error = ''; this.formErrors = {}; }
+
+  validateForm(): boolean {
+    this.formErrors = {};
+    let valid = true;
+    if (!this.userForm.username?.trim()) { this.formErrors.username = 'Username is required.'; valid = false; }
+    if (!this.userForm.email?.trim()) { this.formErrors.email = 'Email is required.'; valid = false; }
+    if (!this.editingUser && !this.userForm.password?.trim()) { this.formErrors.password = 'Password is required.'; valid = false; }
+    if (!this.userForm.gender) { this.formErrors.gender = 'Gender is required.'; valid = false; }
+    if (!this.userForm.phone?.trim()) { this.formErrors.phone = 'Phone number is required.'; valid = false; }
+    if (!this.userForm.address?.trim()) { this.formErrors.address = 'Address is required.'; valid = false; }
+    if (!this.userForm.role?.name) { this.formErrors.role = 'Role is required.'; valid = false; }
+    return valid;
+  }
 
   save() {
+    if (!this.validateForm()) return;
     this.loading = true; this.error = ''; this.success = '';
     const obs = this.editingUser
       ? this.userService.update(this.editingUser.id!, this.userForm)

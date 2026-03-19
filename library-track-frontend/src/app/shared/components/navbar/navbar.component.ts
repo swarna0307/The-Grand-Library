@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,7 +9,11 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  constructor(public auth: AuthService, private router: Router) {}
+  constructor(public auth: AuthService, private router: Router, public layoutService: LayoutService) {}
+
+  toggleSidebar() {
+    this.layoutService.toggleSidebar();
+  }
 
   logout() {
     this.auth.logout();

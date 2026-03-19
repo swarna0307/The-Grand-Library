@@ -9,11 +9,11 @@
           <h1>👥 Users</h1>
           <p class="page-subtitle">{{ filtered.length}} user{{ filtered.length !== 1 ? 's' : '' }}</p>
         </div>
-        
+
         <div class="header-controls">
           <div class="filter-group">
             <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, email..."
-                   [(ngModel)]="searchTerm" (input)="applyAll()">
+              [(ngModel)]="searchTerm" (input)="applyAll()">
           </div>
           <div class="custom-filter-dropdown">
             <button class="filter-btn" (click)="toggleFilterDropdown()" [class.active]="filterDropdownOpen">
@@ -36,6 +36,7 @@
                   <option value="">All Genders</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
+                  <option value="Others">Others</option>
                 </select>
               </div>
             </div>
@@ -115,40 +116,53 @@
     <div class="modal-body">
       <div class="alert alert-error" *ngIf="error">{{ error }}</div>
       <div class="form-group">
-        <label>Username</label>
-        <input class="form-control" [(ngModel)]="userForm.username" placeholder="Username">
+        <label>Username *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.username" [(ngModel)]="userForm.username"
+          placeholder="Username">
+        <span class="field-error" *ngIf="formErrors.username">{{ formErrors.username }}</span>
       </div>
       <div class="form-group">
-        <label>Email</label>
-        <input class="form-control" [(ngModel)]="userForm.email" type="email" placeholder="Email">
+        <label>Email *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.email" [(ngModel)]="userForm.email" type="email"
+          placeholder="Email">
+        <span class="field-error" *ngIf="formErrors.email">{{ formErrors.email }}</span>
       </div>
       <div class="form-group" *ngIf="!editingUser">
-        <label>Password</label>
-        <input class="form-control" [(ngModel)]="userForm.password" type="password" placeholder="Password">
+        <label>Password *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.password" [(ngModel)]="userForm.password"
+          type="password" placeholder="Password">
+        <span class="field-error" *ngIf="formErrors.password">{{ formErrors.password }}</span>
       </div>
       <div class="form-group">
-        <label>Gender</label>
-        <select class="form-control" [(ngModel)]="userForm.gender">
+        <label>Gender *</label>
+        <select class="form-control" [class.is-invalid]="formErrors.gender" [(ngModel)]="userForm.gender">
           <option value="">Select gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
+          <option value="Others">Others</option>
         </select>
+        <span class="field-error" *ngIf="formErrors.gender">{{ formErrors.gender }}</span>
       </div>
       <div class="form-group">
-        <label>Phone</label>
-        <input class="form-control" [(ngModel)]="userForm.phone" placeholder="Phone number">
+        <label>Phone *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.phone" [(ngModel)]="userForm.phone"
+          placeholder="Phone number">
+        <span class="field-error" *ngIf="formErrors.phone">{{ formErrors.phone }}</span>
       </div>
       <div class="form-group">
-        <label>Address</label>
-        <input class="form-control" [(ngModel)]="userForm.address" placeholder="Address">
+        <label>Address *</label>
+        <input class="form-control" [class.is-invalid]="formErrors.address" [(ngModel)]="userForm.address"
+          placeholder="Address">
+        <span class="field-error" *ngIf="formErrors.address">{{ formErrors.address }}</span>
       </div>
       <div class="form-group">
-        <label>Role</label>
-        <select class="form-control" [(ngModel)]="userForm.role.name">
+        <label>Role *</label>
+        <select class="form-control" [class.is-invalid]="formErrors.role" [(ngModel)]="userForm.role.name">
           <option value="ROLE_READER">Reader</option>
           <option value="ROLE_LIBRARIAN">Librarian</option>
           <option value="ROLE_ADMIN">Admin</option>
         </select>
+        <span class="field-error" *ngIf="formErrors.role">{{ formErrors.role }}</span>
       </div>
     </div>
     <div class="modal-footer">

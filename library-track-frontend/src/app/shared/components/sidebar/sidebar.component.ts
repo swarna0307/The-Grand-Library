@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 interface NavItem { label: string; icon: string; route: string; }
 
@@ -14,9 +15,10 @@ export class SidebarComponent implements OnInit {
   menuItems: NavItem[] = [];
   activeRoute = '';
 
-  constructor(public auth: AuthService, private router: Router) {}
+  constructor(public auth: AuthService, private router: Router, public layoutService: LayoutService) {}
 
   ngOnInit() {
+    this.layoutService.sidebarCollapsed$.subscribe(c => this.collapsed = c);
     this.buildNav();
     this.activeRoute = this.router.url;
     this.router.events.subscribe(() => { this.activeRoute = this.router.url; });
@@ -53,12 +55,8 @@ export class SidebarComponent implements OnInit {
     this.menuItems = items;
   }
 
-  toggleCollapse() { this.collapsed = !this.collapsed; }
+
 
   navigate(route: string) { this.router.navigate([route]); }
 
-  get roleLabel(): string {
-    const r = this.auth.getRole();
-    return r === 'ADMIN' ? 'Administrator' : r === 'LIBRARIAN' ? 'Librarian' : 'Reader';
-  }
 }

@@ -1,21 +1,4 @@
 <aside class="sidebar" [class.collapsed]="collapsed" *ngIf="auth.isLoggedIn()">
-  <div class="sidebar-header">
-    <div class="logo" *ngIf="!collapsed">
-      <span class="logo-icon">📚</span>
-      <span class="logo-text">The Grand Library</span>
-    </div>
-    <button class="collapse-btn" (click)="toggleCollapse()">
-      {{ collapsed ? '▶' : '◀' }}
-    </button>
-  </div>
-
-  <div class="user-profile" *ngIf="!collapsed">
-    <div class="avatar">{{ auth.getUsername().charAt(0).toUpperCase() }}</div>
-    <div class="user-details">
-      <div class="user-name">{{ auth.getUsername() }}</div>
-      <div class="user-role">{{ roleLabel }}</div>
-    </div>
-  </div>
 
   <nav class="sidebar-nav">
     <a *ngFor="let item of menuItems"
