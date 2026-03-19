@@ -1,0 +1,162 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <app-navbar></app-navbar>
+    <div class="page-container" style="margin-top: 64px;">
+
+      <div class="page-header">
+        <div class="header-title">
+          <h1>📋 Loans</h1>
+          <p class="page-subtitle">{{ filtered.length }} record{{ filtered.length !== 1 ? 's' : '' }}</p>
+        </div>
+        <div class="header-controls">
+          <div class="filter-group">
+            <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, book, date..."
+                   [(ngModel)]="searchTerm" (input)="applyAll()">
+          </div>
+          <div class="filter-group">
+            
+            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
+              <option value="" disabled selected hidden>Filter</option>
+              <option value="">All</option>
+              <option value="Active">✅ Active</option>
+              <option value="Overdue">⚠️ Overdue</option>
+              <option value="Returned">✔️ Returned</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            
+            <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
+              <option value="" disabled selected hidden>Sort</option>
+              <option value="idDesc">Newest</option>
+              <option value="idAsc">Oldest</option>
+              <option value="readerAsc"  *ngIf="auth.isAdminOrLibrarian()">Reader (A-Z)</option>
+              <option value="readerDesc" *ngIf="auth.isAdminOrLibrarian()">Reader (Z-A)</option>
+              <option value="bookAsc">Book (A-Z)</option>
+              <option value="bookDesc">Book (Z-A)</option>
+              <option value="dueDateAsc">Due Date (Earliest)</option>
+              <option value="dueDateDesc">Due Date (Latest)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">➕ Issue Loan</button>
+        </div>
+      </div>
+
+      <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+      <div class="alert alert-error"   *ngIf="error && !showModal">{{ error }}</div>
+
+      <div class="loading" *ngIf="loading">Loading loans...</div>
+
+      <div *ngIf="!loading">
+        <div class="empty-state glass-card" *ngIf="filtered.length === 0">
+          <div class="empty-icon">📋</div>
+          <h3>No loans found</h3>
+          <p>No loans match your current filters.</p>
+        </div>
+
+        <div class="table-container glass-card" *ngIf="filtered.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th *ngIf="auth.isAdminOrLibrarian()">Reader</th>
+                <th>Book</th>
+                <th>Loan Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Status</th>
+                <th *ngIf="auth.isAdminOrLibrarian()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let l of filtered">
+                <td>{{ l.loanId }}</td>
+                <td *ngIf="auth.isAdminOrLibrarian()">{{ l.userName }}</td>
+                <td><strong>{{ l.book?.title }}</strong><br><small>by {{ l.book?.author }}</small></td>
+                <td>{{ l.loanDate || '—' }}</td>
+                <td>{{ l.dueDate || '—' }}</td>
+                <td>{{ l.returnDate || '—' }}</td>
+                <td><span class="badge" [ngClass]="statusClass(l.status)">{{ l.status }}</span></td>
+                <td *ngIf="auth.isAdminOrLibrarian()">
+                  <div class="action-btns">
+                    <button class="btn btn-secondary btn-sm" (click)="openEdit(l)">✏️</button>
+                    <button class="btn btn-danger btn-sm" (click)="delete(l)">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loan Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingLoan ? '✏️ Update Loan' : '➕ Issue Loan' }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <ng-container *ngIf="!editingLoan">
+        <div class="form-group">
+          <label>Reader User ID *</label>
+          <input class="form-control" [class.is-invalid]="formErrors.userId" [(ngModel)]="loanForm.userId" type="number" placeholder="Enter reader's user ID">
+          <span class="field-error" *ngIf="formErrors.userId">{{ formErrors.userId }}</span>
+        </div>
+        <div class="form-group">
+          <label>Look up Book by ISBN</label>
+          <div class="isbn-search-row">
+            <input class="form-control" [(ngModel)]="loanForm.isbnQuery" placeholder="Enter ISBN..." (keyup.enter)="lookupBook()">
+            <button class="btn btn-secondary btn-sm" (click)="lookupBook()" [disabled]="lookingUpBook">
+              {{ lookingUpBook ? '⏳' : '🔍 Find' }}
+            </button>
+          </div>
+          <div class="found-book-card" *ngIf="foundBook">
+            <strong>{{ foundBook.title }}</strong> by {{ foundBook.author }}
+            <span class="badge" [class.badge-success]="foundBook.availabilityStatus === 'Available'" [class.badge-danger]="foundBook.availabilityStatus !== 'Available'" style="margin-left:8px">
+              {{ foundBook.availabilityStatus === 'NotAvailable' ? '🚫 Not Available' : '✅ Available' }}
+              · {{ (foundBook.availableCopies ?? 0) }} cop{{ (foundBook.availableCopies ?? 0) !== 1 ? 'ies' : 'y' }}
+            </span>
+          </div>
+          <span class="field-error" *ngIf="formErrors.bookId">{{ formErrors.bookId }}</span>
+        </div>
+        <div class="form-group">
+          <label>Due Date *</label>
+          <input class="form-control" [class.is-invalid]="formErrors.dueDate" [(ngModel)]="loanForm.dueDate" type="date">
+          <span class="field-error" *ngIf="formErrors.dueDate">{{ formErrors.dueDate }}</span>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="editingLoan">
+        <div class="found-book-card" *ngIf="foundBook">
+          <strong>{{ foundBook.title }}</strong> by {{ foundBook.author }}
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input class="form-control" [(ngModel)]="loanForm.dueDate" type="date">
+        </div>
+        <div class="form-group">
+          <label>Return Date</label>
+          <input class="form-control" [(ngModel)]="loanForm.returnDate" type="date">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" [(ngModel)]="loanForm.loanStatus">
+            <option value="Active">✅ Active</option>
+            <option value="Overdue">⚠️ Overdue</option>
+            <option value="Returned">✔️ Returned</option>
+          </select>
+        </div>
+      </ng-container>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">{{ editingLoan ? '💾 Update' : '➕ Issue Loan' }}</button>
+    </div>
+  </div>
+</div>
