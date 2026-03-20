@@ -21,6 +21,15 @@ public class DashboardDto {
 	
 	private Map<String, Long> booksPerCategory;
 	private Map<String, Long> booksByAvailability;
+	private long totalInProgress;
+
+	public long getTotalInProgress() {
+		return totalInProgress;
+	}
+	public void setTotalInProgress(long totalInProgress) {
+		this.totalInProgress = totalInProgress;
+	}
+
 	public long getTotalBooks() {
 		return totalBooks;
 	}

@@ -45,7 +45,7 @@
               style="text-decoration: none; color: inherit; display: block;">
               <div class="stat-icon loans">📋</div>
               <div class="stat-content">
-                <h3>Active Loans</h3>
+                <h3>Ongoing Loans</h3>
                 <div class="stat-value">{{ dashboard?.totalLoans || 0 }}</div>
               </div>
             </a>
@@ -55,6 +55,14 @@
               <div class="stat-content">
                 <h3>Active Reservations</h3>
                 <div class="stat-value">{{ dashboard?.totalReservations || 0 }}</div>
+              </div>
+            </a>
+            <a routerLink="/reading-progress" class="stat-card glass-card info"
+              style="text-decoration: none; color: inherit; display: block;">
+              <div class="stat-icon progress">📖</div>
+              <div class="stat-content">
+                <h3>Reading In Progress</h3>
+                <div class="stat-value">{{ dashboard?.totalInProgress || 0 }}</div>
               </div>
             </a>
           </div>
@@ -81,49 +89,98 @@
 
         </ng-container>
 
-        <!-- ════════════ READER DASHBOARD ════════════ -->
+        <!-- ════════════ READER DASHBOARD (Modern Redesign v2) ════════════ -->
         <ng-container *ngIf="auth.isReader()">
-          <div class="stats-grid">
-            <a routerLink="/loans" class="stat-card glass-card primary"
-              style="text-decoration: none; color: inherit; display: block;">
-              <div class="stat-icon loans">📋</div>
-              <div class="stat-content">
-                <h3>My Active Loans</h3>
-                <div class="stat-value">{{ dashboard?.totalLoans || 0 }}</div>
-              </div>
-            </a>
-            <a routerLink="/reservations" class="stat-card glass-card warning"
-              style="text-decoration: none; color: inherit; display: block;">
-              <div class="stat-icon reservations">🔖</div>
-              <div class="stat-content">
-                <h3>My Active Reservations</h3>
-                <div class="stat-value">{{ dashboard?.totalReservations || 0 }}</div>
-              </div>
-            </a>
-            <a routerLink="/books" class="stat-card glass-card success"
-              style="text-decoration: none; color: inherit; display: block;">
-              <div class="stat-icon books">📚</div>
-              <div class="stat-content">
-                <h3>Total Books</h3>
-                <div class="stat-value">{{ dashboard?.totalBooks || 0 }}</div>
-              </div>
-            </a>
-            <a routerLink="/categories" class="stat-card glass-card danger"
-              style="text-decoration: none; color: inherit; display: block;">
-              <div class="stat-icon categories">📈</div>
-              <div class="stat-content">
-                <h3>Total Categories</h3>
-                <div class="stat-value">{{ dashboard?.totalCategories || 0 }}</div>
-              </div>
-            </a>
-          </div>
+          <div class="reader-dashboard-v2">
 
-          <div class="glass-card reading-tip">
-            <div class="tip-icon">💡</div>
-            <div>
-              <h4>Reading Tip</h4>
-              <p>Track your reading progress to stay motivated. Update your current page after each session!</p>
+            <!-- 1. HERO PROGRESS SECTION -->
+            <div class="hero-section" *ngIf="activeReading.length > 0">
+              <div class="glass-hero" *ngFor="let p of activeReading.slice(0, 1)">
+                <div class="hero-content">
+                  <div class="hero-label">CURRENTLY READING</div>
+                  <h1>{{ p.book?.title }}</h1>
+                  <p class="hero-subtitle">by {{ p.book?.author }} &bull; {{ p.percentageComplete | number:'1.2-2' }}% Complete</p>
+
+                  <div class="hero-progress-stack">
+                    <div class="hero-track">
+                      <div class="hero-fill" [style.width.%]="p.percentageComplete"></div>
+                    </div>
+                    <a routerLink="/reading-progress" class="hero-btn">Update Progress</a>
+                  </div>
+                </div>
+                <div class="hero-visual">
+                  <div class="hero-book-card">📘</div>
+                </div>
+              </div>
             </div>
+
+            <!-- 2. QUICK STATS ROW (Sleek) -->
+            <!-- 2. QUICK STATS GRID (Premium - Matching Admin Style) -->
+            <div class="stats-grid single-line">
+              <a routerLink="/loans" class="stat-card glass-card primary">
+                <div class="stat-icon pulse">📋</div>
+                <div class="stat-content">
+                  <h3>My Loans</h3>
+                  <div class="stat-value">{{ dashboard?.totalLoans || 0 }}</div>
+                </div>
+              </a>
+
+              <a routerLink="/reservations" class="stat-card glass-card warning">
+                <div class="stat-icon">🔖</div>
+                <div class="stat-content">
+                  <h3>My Reservations</h3>
+                  <div class="stat-value">{{ dashboard?.totalReservations || 0 }}</div>
+                </div>
+              </a>
+
+              <a routerLink="/reading-progress" class="stat-card glass-card info">
+                <div class="stat-icon progress">📖</div>
+                <div class="stat-content">
+                  <h3>In Progress</h3>
+                  <div class="stat-value">{{ dashboard?.totalInProgress || 0 }}</div>
+                </div>
+              </a>
+
+              <a routerLink="/books" class="stat-card glass-card success">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                  <h3>Catalog</h3>
+                  <div class="stat-value">{{ dashboard?.totalBooks || 0 }}</div>
+                </div>
+              </a>
+            </div>
+
+            <!-- 3. MAIN CONTENT GRID -->
+            <div class="modern-grid">
+
+              <!-- LEFT: ACTIVITY & LISTS -->
+              <div class="modern-main">
+                <section class="modern-section" *ngIf="dueSoonLoans.length > 0">
+                  <div class="section-title">
+                    <span class="icon">⚠️</span>
+                    <h3>Action Required</h3>
+                  </div>
+                  <div class="modern-alert" *ngFor="let l of dueSoonLoans">
+                    <div class="alert-info">
+                      <strong>{{ l.book?.title }}</strong>
+                      <span>Due: {{ l.dueDate | date:'mediumDate' }}</span>
+                    </div>
+                    <a routerLink="/loans" class="small-btn">View Loan</a>
+                  </div>
+                </section>
+              </div>
+
+              <!-- RIGHT: QUICK DISCOVER (Placeholder for engagement) -->
+              <div class="modern-side">
+                <div class="discovery-card">
+                  <h4>Discover More</h4>
+                  <p>Explore thousands of books across diverse categories.</p>
+                  <a routerLink="/books" class="outline-btn">Explore Library</a>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </ng-container>
 

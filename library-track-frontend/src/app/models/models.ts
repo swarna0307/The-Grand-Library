@@ -71,6 +71,7 @@ export interface DashboardDto {
   totalCategories?: number;
   totalLoans?: number;
   totalReservations?: number;
+  totalInProgress?: number;
   booksPerCategory?: { [key: string]: number };
   booksByAvailability?: { [key: string]: number };
 }

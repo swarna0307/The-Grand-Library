@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { UserService } from '../../core/services/user.service';
-import { DashboardDto, UserDto } from '../../models/models';
+import { LoanService } from '../../core/services/loan.service';
+import { ReservationService } from '../../core/services/reservation.service';
+import { ReadingProgressService } from '../../core/services/reading-progress.service';
+import { BookService } from '../../core/services/book.service';
+import { Book, DashboardDto, LoanDto, ReadingProgressDto, ReservationDto } from '../../models/models';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,9 +19,19 @@ export class DashboardComponent implements OnInit {
   error = '';
   currentTime = new Date();
 
+  // Reader Specific Data
+  activeReading: ReadingProgressDto[] = [];
+  dueSoonLoans: LoanDto[] = [];
+  recentReservations: ReservationDto[] = [];
+  newArrivals: Book[] = [];
+
   constructor(
     public auth: AuthService,
-    private dashService: DashboardService
+    private dashService: DashboardService,
+    private loanService: LoanService,
+    private resService: ReservationService,
+    private progressService: ReadingProgressService,
+    private bookService: BookService
   ) {}
 
   ngOnInit() {
@@ -27,18 +41,51 @@ export class DashboardComponent implements OnInit {
 
   loadDashboard() {
     const role = this.auth.getRole();
-    if (role === 'READER') {
-      const userId = this.auth.getUserId();
-      if (userId) {
-        this.dashService.getReaderDashboard(Number(userId)).subscribe({
-          next: (res) => { this.dashboard = res.data; this.loading = false; },
-          error: (e) => { 
-            this.loading = false;
-            this.error = e.error?.message || 'Could not load your reader dashboard.';
-          }
-        });
-      } else { this.loading = false; }
+    const userId = this.auth.getUserId();
+
+    if (role === 'READER' && userId) {
+      // Fetch everything for reader
+      forkJoin({
+        stats: this.dashService.getReaderDashboard(Number(userId)),
+        loans: this.loanService.getAll(),
+        reservations: this.resService.getAll(),
+        progress: this.progressService.getAll(),
+        books: this.bookService.getAll()
+      }).subscribe({
+        next: (res) => {
+          this.dashboard = res.stats.data;
+          
+          // Process Active Reading
+          this.activeReading = (res.progress.data || [])
+            .filter(p => !p.isHistory && (p.percentageComplete || 0) < 100)
+            .sort((a,b) => new Date(b.lastUpdated || '').getTime() - new Date(a.lastUpdated || '').getTime());
+
+          // Process Due Soon (next 7 days)
+          const today = new Date();
+          const nextWeek = new Date();
+          nextWeek.setDate(today.getDate() + 7);
+          
+          this.dueSoonLoans = (res.loans.data || [])
+            .filter(l => l.status === 'Active' && l.dueDate && new Date(l.dueDate) <= nextWeek)
+            .sort((a,b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());
+
+          // Process Recent Reservations
+          this.recentReservations = (res.reservations.data || [])
+            .filter(r => r.status === 'Active')
+            .slice(0, 4);
+
+          // Process New Arrivals
+          this.newArrivals = (res.books.data || []).slice(-4).reverse();
+          
+          this.loading = false;
+        },
+        error: (e) => {
+          this.loading = false;
+          this.error = e.error?.message || 'Could not load your reader dashboard.';
+        }
+      });
     } else {
+      // Admin/Librarian path
       this.dashService.getDashboard().subscribe({
         next: (res) => { this.dashboard = res.data; this.loading = false; },
         error: (e) => { 

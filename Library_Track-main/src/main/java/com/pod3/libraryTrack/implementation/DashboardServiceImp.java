@@ -12,11 +12,13 @@ import com.pod3.libraryTrack.Exceptions.DetailsNotFoundException;
 import com.pod3.libraryTrack.dto.DashboardDto;
 import com.pod3.libraryTrack.model.Book;
 import com.pod3.libraryTrack.model.Loan;
+import com.pod3.libraryTrack.model.ReadingProgress;
 import com.pod3.libraryTrack.model.Reservation;
 import com.pod3.libraryTrack.model.User;
 import com.pod3.libraryTrack.repository.BookRepository;
 import com.pod3.libraryTrack.repository.CategoryRepository;
 import com.pod3.libraryTrack.repository.LoanRepository;
+import com.pod3.libraryTrack.repository.ReadingProgressRepository;
 import com.pod3.libraryTrack.repository.ReservationRepository;
 import com.pod3.libraryTrack.repository.UserRepository;
 import com.pod3.libraryTrack.service.DashboardService;
@@ -32,6 +34,8 @@ public class DashboardServiceImp implements DashboardService {
     private final CategoryRepository categoryRepo;
     private final ReservationRepository reservationRepo;
     private final LoanRepository loanRepo;
+    private final ReadingProgressRepository readingProgressRepo;
+
 
     @Override
     public DashboardDto getDashboardReport() {
@@ -81,11 +85,16 @@ public class DashboardServiceImp implements DashboardService {
                 .filter(l -> l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Active || l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Overdue)
                 .count();
 
+        long totalInProgressCount = readingProgressRepo.findAll().stream()
+                .filter(p -> p.getPercentageComplete() != null && p.getPercentageComplete() < 100 && !isHistory(p))
+                .count();
+
         DashboardDto dto = DashboardDto.builder()
                 .totalBooks(bookRepo.count())
                 .totalCategories(categoryRepo.count())
                 .totalReservations(activeReservations)
                 .totalLoans(activeLoans)
+                .totalInProgress(totalInProgressCount)
                 .booksPerCategory(booksPerCategory)
                 .booksByAvailability(booksByAvailability)
                 .build();
@@ -138,16 +147,31 @@ public class DashboardServiceImp implements DashboardService {
                 .filter(l -> l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Active || l.getStatus() == com.pod3.libraryTrack.constants.LoanStatus.Overdue)
                 .count();
 
+        long totalInProgressCount = readingProgressRepo.findByUserUserId(readerId).stream()
+                .filter(p -> p.getPercentageComplete() != null && p.getPercentageComplete() < 100 && !isHistory(p))
+                .count();
+
         DashboardDto dto = DashboardDto.builder()
                 .totalBooks(bookRepo.count())
                 .totalCategories(categoryRepo.count())
                 .totalReservations(activeReservations)
                 .totalLoans(activeLoans)
+                .totalInProgress(totalInProgressCount)
                 .booksPerCategory(booksPerCategory)
                 .booksByAvailability(booksByAvailability)
                 .build();
 
         log.info("Reader dashboard generated successfully for user {}", username);
         return dto;
+    }
+
+    private boolean isHistory(ReadingProgress progress) {
+        boolean hasActiveLoan = loanRepo.existsByUserUsernameAndBookBookIdAndStatusIn(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), 
+                List.of(com.pod3.libraryTrack.constants.LoanStatus.Active, com.pod3.libraryTrack.constants.LoanStatus.Overdue));
+        boolean hasActiveReservation = reservationRepo.existsByUserUsernameAndBookBookIdAndStatus(
+                progress.getUser().getUsername(), progress.getBook().getBookId(), 
+                com.pod3.libraryTrack.constants.ReservationStatus.Active);
+        return !hasActiveLoan && !hasActiveReservation;
     }
 }
