@@ -1,16 +1,14 @@
 <aside class="sidebar" [class.collapsed]="collapsed" *ngIf="auth.isLoggedIn()">
 
   <nav class="sidebar-nav">
-    <a *ngFor="let item of menuItems"
-       class="nav-item"
-       [class.active]="activeRoute === item.route"
-       (click)="navigate(item.route)">
+    <a *ngFor="let item of menuItems" class="nav-item" [class.active]="activeRoute === item.route"
+      (click)="navigate(item.route)">
       <span class="nav-icon">{{ item.icon }}</span>
       <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
     </a>
   </nav>
 
   <div class="sidebar-footer" *ngIf="!collapsed">
-    <div class="version">v1.0.0 · Library System</div>
+    <div class="version">The Grand Library</div>
   </div>
 </aside>
