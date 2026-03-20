@@ -12,43 +12,50 @@
             <span *ngIf="books.length"> · {{ filtered.length }} book{{ filtered.length !== 1 ? 's' : '' }}</span>
           </p>
         </div>
-        <div class="header-controls">
-          <input class="search-input" type="text" placeholder="🔍 Search title, author, or ISBN..."
-            [(ngModel)]="searchTerm" (input)="applyAll()">
-          <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-            <option value="" disabled selected hidden>Sort</option>
-            <option value="titleAsc">Name (A-Z)</option>
-            <option value="titleDesc">Name (Z-A)</option>
-            <option value="authorAsc">Author (A-Z)</option>
-            <option value="authorDesc">Author (Z-A)</option>
-            <option value="copiesDesc">Copies (High→Low)</option>
-            <option value="copiesAsc">Copies (Low→High)</option>
-          </select>
-          <div class="custom-filter-dropdown">
-            <button class="filter-btn" (click)="toggleFilterDropdown()" [class.active]="filterDropdownOpen">
-              Filter
-              <span class="dropdown-arrow" [class.open]="filterDropdownOpen">▼</span>
-            </button>
-            <div class="filter-panel" [class.open]="filterDropdownOpen">
-              <div class="filter-item">
-                <label>Status</label>
-                <select class="filter-select" [(ngModel)]="filterAvailability" (change)="applyAll()">
-                  <option value="">All Statuses</option>
-                  <option *ngFor="let s of STATUS_OPTIONS" [value]="s.value">{{ s.label }}</option>
-                </select>
-              </div>
-              <div class="filter-item">
-                <label>Category</label>
-                <select class="filter-select" [(ngModel)]="filterCategory" (change)="onFilterCategoryChange()">
-                  <option value="">All Categories</option>
-                  <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
-                </select>
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search title, author, or ISBN..."
+                [(ngModel)]="searchTerm" (input)="applyAll()">
+            </div>
+            
+            <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
+              <option value="" disabled selected hidden>Sort By</option>
+              <option value="titleAsc">Name (A-Z)</option>
+              <option value="titleDesc">Name (Z-A)</option>
+              <option value="authorAsc">Author (A-Z)</option>
+              <option value="authorDesc">Author (Z-A)</option>
+              <option value="copiesDesc">Copies (High→Low)</option>
+              <option value="copiesAsc">Copies (Low→High)</option>
+            </select>
+
+            <div class="custom-filter-dropdown">
+              <button class="filter-btn" (click)="toggleFilterDropdown()" [class.active]="filterDropdownOpen">
+                Filter
+                <span class="dropdown-arrow" [class.open]="filterDropdownOpen">▼</span>
+              </button>
+              <div class="filter-panel" [class.open]="filterDropdownOpen">
+                <div class="filter-item">
+                  <label>Status</label>
+                  <select class="filter-select" [(ngModel)]="filterAvailability" (change)="applyAll()">
+                    <option value="">All Statuses</option>
+                    <option *ngFor="let s of STATUS_OPTIONS" [value]="s.value">{{ s.label }}</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label>Category</label>
+                  <select class="filter-select" [(ngModel)]="filterCategory" (change)="onFilterCategoryChange()">
+                    <option value="">All Categories</option>
+                    <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
-          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
-            ➕ Add Book
-          </button>
+
+          <div class="bar-aside" *ngIf="auth.isAdminOrLibrarian()">
+            <button class="btn btn-primary" (click)="openAdd()">➕ Add Book</button>
+          </div>
         </div>
       </div>
 

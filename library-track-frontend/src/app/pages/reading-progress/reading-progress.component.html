@@ -8,28 +8,21 @@
         <div class="header-title">
           <h1>📈 Reading Progress</h1>
           <p class="page-subtitle">
-            <span *ngIf="auth.isReader()">Track pages read and completion percentage</span>
+            <span *ngIf="auth.isReader()">Track completion percentage</span>
             <span *ngIf="auth.isAdminOrLibrarian()">All readers' reading progress</span>
             <span *ngIf="filtered.length"> · {{ filtered.length }} record{{ filtered.length !== 1 ? 's' : '' }}</span>
           </p>
         </div>
 
-        <div class="header-controls">
-          <div class="filter-group">
-            <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, book..."
-              [(ngModel)]="searchTerm" (input)="applyAll()">
-          </div>
-          <div class="filter-group">
-            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
-              <option value="" disabled selected hidden>Filter</option>
-              <option value="">All</option>
-              <option value="InProgress">📖 In Progress</option>
-              <option value="Completed">✅ Completed</option>
-            </select>
-          </div>
-          <div class="filter-group">
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search ID, user, book..." [(ngModel)]="searchTerm"
+                (input)="applyAll()">
+            </div>
+
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-              <option value="" disabled selected hidden>Sort</option>
+              <option value="" disabled selected hidden>Sort By</option>
               <option value="idDesc">Newest</option>
               <option value="idAsc">Oldest</option>
               <option value="readerAsc" *ngIf="auth.isAdminOrLibrarian()">Reader (A-Z)</option>
@@ -39,8 +32,19 @@
               <option value="pctDesc">Percentage (High→Low)</option>
               <option value="pctAsc">Percentage (Low→High)</option>
             </select>
+
+            <select class="form-control" [ngModel]="''" (ngModelChange)="onFilterStatus($event)"
+              style="width: auto; min-width: 140px;">
+              <option value="" disabled selected hidden>Filter Status</option>
+              <option value="">All Statuses</option>
+              <option value="InProgress">📖 In Progress</option>
+              <option value="Completed">✅ Completed</option>
+            </select>
           </div>
-          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isReader()">📖 Track a Book</button>
+
+          <div class="bar-aside" *ngIf="auth.isReader()">
+            <button class="btn btn-primary" (click)="openAdd()">📖 Track a Book</button>
+          </div>
         </div>
       </div>
 
@@ -138,12 +142,12 @@
                   <div class="book-cell">
                     <strong>{{ p.book?.title || ('Book #' + p.book?.bookId) }}</strong>
                     <span class="book-author-sm">{{ p.book?.author }}</span>
-                    <span class="book-isbn-sm" *ngIf="p.book?.isbn">ISBN: {{ p.book?.isbn }}</span>
                   </div>
                 </td>
                 <td>
                   <div style="font-weight: 600; font-size: 14px; color: var(--text);">
-                    📄 {{ p.pagesRead || 0 }} <span style="color: var(--navy-600); margin: 0 4px;">/</span> {{
+                    📄 {{ p.pagesRead || 0 }} <span
+                      style="color: var(--text-muted); margin: 0 4px; font-weight: 800;">/</span> {{
                     p.totalPages || '?' }}
                   </div>
                 </td>
@@ -160,8 +164,10 @@
                 </td>
                 <td>
                   <div class="date-cell" *ngIf="p.lastUpdated">
-                    <div style="font-weight: 600;">{{ p.lastUpdated | date:'mediumDate' }}</div>
-                    <div style="font-size: 11px; opacity: 0.6;">{{ p.lastUpdated | date:'shortTime' }}</div>
+                    <div style="font-weight: 600; color: var(--text-primary);">{{ p.lastUpdated | date:'mediumDate' }}
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">{{ p.lastUpdated |
+                      date:'shortTime' }}</div>
                   </div>
                   <span *ngIf="!p.lastUpdated">—</span>
                 </td>

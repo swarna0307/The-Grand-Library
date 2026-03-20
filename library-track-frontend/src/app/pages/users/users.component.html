@@ -10,40 +10,42 @@
           <p class="page-subtitle">{{ filtered.length}} user{{ filtered.length !== 1 ? 's' : '' }}</p>
         </div>
 
-        <div class="header-controls">
-          <div class="filter-group">
-            <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, email..."
-              [(ngModel)]="searchTerm" (input)="applyAll()">
-          </div>
-          <div class="custom-filter-dropdown">
-            <button class="filter-btn" (click)="toggleFilterDropdown()" [class.active]="filterDropdownOpen">
-              Filter
-              <span class="dropdown-arrow" [class.open]="filterDropdownOpen">▼</span>
-            </button>
-            <div class="filter-panel" [class.open]="filterDropdownOpen">
-              <div class="filter-item">
-                <label>Role</label>
-                <select class="filter-select" [(ngModel)]="filterRole" (change)="applyAll()">
-                  <option value="">All Roles</option>
-                  <option value="ROLE_ADMIN">Admin</option>
-                  <option value="ROLE_LIBRARIAN">Librarian</option>
-                  <option value="ROLE_READER">Reader</option>
-                </select>
-              </div>
-              <div class="filter-item">
-                <label>Gender</label>
-                <select class="filter-select" [(ngModel)]="filterGender" (change)="applyAll()">
-                  <option value="">All Genders</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Others">Others</option>
-                </select>
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search ID, user, email..."
+                [(ngModel)]="searchTerm" (input)="applyAll()">
+            </div>
+            
+            <div class="custom-filter-dropdown">
+              <button class="filter-btn" (click)="toggleFilterDropdown()" [class.active]="filterDropdownOpen">
+                Filter
+                <span class="dropdown-arrow" [class.open]="filterDropdownOpen">▼</span>
+              </button>
+              <div class="filter-panel" [class.open]="filterDropdownOpen">
+                <div class="filter-item">
+                  <label>Role</label>
+                  <select class="filter-select" [(ngModel)]="filterRole" (change)="applyAll()">
+                    <option value="">All Roles</option>
+                    <option value="ROLE_ADMIN">Admin</option>
+                    <option value="ROLE_LIBRARIAN">Librarian</option>
+                    <option value="ROLE_READER">Reader</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label>Gender</label>
+                  <select class="filter-select" [(ngModel)]="filterGender" (change)="applyAll()">
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="filter-group">
+
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-              <option value="" disabled selected hidden>Sort</option>
+              <option value="" disabled selected hidden>Sort By</option>
               <option value="idDesc">Newest</option>
               <option value="idAsc">Oldest</option>
               <option value="usernameAsc">Username (A-Z)</option>
@@ -52,7 +54,10 @@
               <option value="dateAsc">Date (Oldest)</option>
             </select>
           </div>
-          <button class="btn btn-primary" (click)="openAdd()">➕ Add User</button>
+
+          <div class="bar-aside">
+            <button class="btn btn-primary" (click)="openAdd()">➕ Add User</button>
+          </div>
         </div>
       </div>
 

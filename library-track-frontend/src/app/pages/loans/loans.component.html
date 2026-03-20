@@ -9,36 +9,37 @@
           <h1>📋 Loans</h1>
           <p class="page-subtitle">{{ filtered.length }} record{{ filtered.length !== 1 ? 's' : '' }}</p>
         </div>
-        <div class="header-controls">
-          <div class="filter-group">
-            <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, book, date..."
-                   [(ngModel)]="searchTerm" (input)="applyAll()">
-          </div>
-          <div class="filter-group">
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search ID, user, book..."
+                     [(ngModel)]="searchTerm" (input)="applyAll()">
+            </div>
             
-            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
-              <option value="" disabled selected hidden>Filter</option>
-              <option value="">All</option>
+            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)" style="width: auto; min-width: 140px;">
+              <option value="" disabled selected hidden>Filter Status</option>
+              <option value="">All Status</option>
               <option value="Active">✅ Active</option>
               <option value="Overdue">⚠️ Overdue</option>
               <option value="Returned">✔️ Returned</option>
             </select>
-          </div>
-          <div class="filter-group">
-            
+
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-              <option value="" disabled selected hidden>Sort</option>
+              <option value="" disabled selected hidden>Sort By</option>
               <option value="idDesc">Newest</option>
               <option value="idAsc">Oldest</option>
               <option value="readerAsc"  *ngIf="auth.isAdminOrLibrarian()">Reader (A-Z)</option>
               <option value="readerDesc" *ngIf="auth.isAdminOrLibrarian()">Reader (Z-A)</option>
               <option value="bookAsc">Book (A-Z)</option>
               <option value="bookDesc">Book (Z-A)</option>
-              <option value="dueDateAsc">Due Date (Earliest)</option>
+              <option value="dueDateAsc">Due Date (Soonest)</option>
               <option value="dueDateDesc">Due Date (Latest)</option>
             </select>
           </div>
-          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">➕ Issue Loan</button>
+
+          <div class="bar-aside" *ngIf="auth.isAdminOrLibrarian()">
+            <button class="btn btn-primary" (click)="openAdd()">➕ Issue Loan</button>
+          </div>
         </div>
       </div>
 

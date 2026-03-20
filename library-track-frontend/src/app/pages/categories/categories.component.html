@@ -13,28 +13,31 @@
             <span *ngIf="filteredCategories.length"> · {{ filteredCategories.length }} record{{ filteredCategories.length !== 1 ? 's' : '' }}</span>
           </p>
         </div>
-        <div class="header-controls">
-          <input class="search-input" type="text" placeholder="🔍 Search categories..."
-                 [(ngModel)]="searchTerm" (input)="applySearch()">
-          <div class="filter-group">
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search categories..."
+                     [(ngModel)]="searchTerm" (input)="applySearch()">
+            </div>
+            
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-              <option value="" disabled selected hidden>Sort</option>
+              <option value="" disabled selected hidden>Sort By</option>
               <option value="idDesc">Newest</option>
               <option value="idAsc">Oldest</option>
               <option value="nameAsc">Name (A-Z)</option>
               <option value="nameDesc">Name (Z-A)</option>
             </select>
-          </div>
-          <div class="filter-group" *ngIf="categories.length > 0">
-            <select class="sort-select" [ngModel]="''" (ngModelChange)="onFilterCategory($event)">
-              <option value="" disabled selected hidden>Filter</option>
-              <option value="">All</option>
+
+            <select class="form-control" [ngModel]="''" (ngModelChange)="onFilterCategory($event)" *ngIf="categories.length > 0" style="width: auto; min-width: 140px;">
+              <option value="" disabled selected hidden>Filter Category</option>
+              <option value="">All Categories</option>
               <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
             </select>
           </div>
-          <button class="btn btn-primary" (click)="openAdd()" *ngIf="auth.isAdminOrLibrarian()">
-            ➕ New Category
-          </button>
+
+          <div class="bar-aside" *ngIf="auth.isAdminOrLibrarian()">
+            <button class="btn btn-primary" (click)="openAdd()">➕ New Category</button>
+          </div>
         </div>
       </div>
 
@@ -52,8 +55,7 @@
 
         <div class="categories-grid" *ngIf="filteredCategories.length > 0">
           <div class="category-card glass-card" *ngFor="let c of filteredCategories" 
-               [routerLink]="['/books']" [queryParams]="{categoryId: c.categoryId}" 
-               style="cursor: pointer; transition: transform 0.2s;">
+               [routerLink]="['/books']" [queryParams]="{categoryId: c.categoryId}">
             <div class="category-card-header">
               <div class="category-icon">🗂️</div>
               <div class="category-meta">

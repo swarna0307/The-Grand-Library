@@ -162,17 +162,7 @@
   }
 }
 
-.header-title {
-  flex: 1;
-}
-
-.header-controls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
+/* ── Reservations Container ────────────────────────────── */
 .reservations-container {
   display: flex;
   flex-direction: column;

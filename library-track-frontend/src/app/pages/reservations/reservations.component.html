@@ -10,23 +10,23 @@
           <p class="page-subtitle">{{ filtered.length }} record{{ filtered.length !== 1 ? 's' : '' }}</p>
         </div>
         
-        <div class="header-controls">
-          <div class="filter-group">
-            <input class="form-control filter-input" type="text" placeholder="🔍 Search ID, user, book, date..."
-                   [(ngModel)]="searchTerm" (input)="applyAll()">
-          </div>
-          <div class="filter-group">
-              <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)">
-                <option value="" disabled selected hidden>Filter</option>
-                <option value="">All</option>
-                <option value="Active">⏳ Active</option>
-                <option value="Fulfilled">✅ Fulfilled</option>
-                <option value="Cancelled">❌ Cancelled</option>
-              </select>
-          </div>
-          <div class="filter-group">
+        <div class="action-bar">
+          <div class="bar-main">
+            <div class="search-box">
+              <input class="form-control" type="text" placeholder="Search ID, user, book..."
+                     [(ngModel)]="searchTerm" (input)="applyAll()">
+            </div>
+            
+            <select class="form-control filter-select" [ngModel]="''" (ngModelChange)="onFilterStatus($event)" style="width: auto; min-width: 140px;">
+              <option value="" disabled selected hidden>Filter Status</option>
+              <option value="">All Status</option>
+              <option value="Active">⏳ Active</option>
+              <option value="Fulfilled">✅ Fulfilled</option>
+              <option value="Cancelled">❌ Cancelled</option>
+            </select>
+
             <select class="sort-select" [ngModel]="''" (ngModelChange)="onSort($event)">
-              <option value="" disabled selected hidden>Sort</option>
+              <option value="" disabled selected hidden>Sort By</option>
               <option value="idDesc">Newest</option>
               <option value="idAsc">Oldest</option>
               <option value="readerAsc" *ngIf="auth.isAdminOrLibrarian()">Reader (A-Z)</option>
@@ -37,9 +37,10 @@
               <option value="dateDesc">Date (Latest)</option>
             </select>
           </div>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-primary" *ngIf="auth.isReader()" (click)="openCreate()">➕ New Reservation</button>
+
+          <div class="bar-aside" *ngIf="auth.isReader()">
+            <button class="btn btn-primary" (click)="openCreate()">➕ New Reservation</button>
+          </div>
         </div>
       </div>
 

@@ -1,43 +1,53 @@
 .sidebar {
   position: fixed; top: 64px; left: 0; bottom: 0; z-index: 100;
-  width: var(--sidebar-width); background: var(--primary-light);
-  border-right: 1px solid var(--border);
+  width: var(--sidebar-width); 
+  background: #2d26d7; /* Vibrant Deep Purple/Blue restored */
   display: flex; flex-direction: column;
   transition: width 0.3s ease;
+  box-shadow: 4px 0 20px rgba(45, 38, 215, 0.1);
   overflow: hidden;
 
-  &.collapsed {
-    width: 68px;
-    .sidebar-nav .nav-item { justify-content: center; padding: 14px; }
-  }
-
-
-
-
-
   .sidebar-nav {
-    flex: 1; overflow-y: auto; padding: 0 8px 12px 8px;
+    flex: 1; padding: 24px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto;
 
     .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 12px; border-radius: 10px; margin-bottom: 4px;
-      cursor: pointer; color: var(--text-muted); font-size: 14px;
-      transition: all 0.2s ease; font-weight: 500; text-decoration: none;
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 20px; border-radius: 14px;
+      text-decoration: none; color: #ffffff; /* High contrast white */
+      font-weight: 600; transition: all 0.25s ease;
+      cursor: pointer;
 
-      &:hover { background: var(--glass); color: var(--text); }
-      &.active {
-        background: rgba(245, 158, 11, 0.15); color: var(--accent);
-        border-left: 3px solid var(--accent); padding-left: 9px;
+      .nav-icon { font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 1; color: #ffffff; }
+      .nav-label { font-size: 14px; white-space: nowrap; }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        .nav-icon { opacity: 1; }
       }
 
-      .nav-icon { font-size: 18px; flex-shrink: 0; }
-      .nav-label { white-space: nowrap; }
+      &.active {
+        background: #ffffff;
+        color: #2d26d7;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        
+        .nav-icon { color: #2d26d7; }
+      }
     }
   }
 
+  &.collapsed {
+    width: 80px;
+    .nav-label { display: none; }
+    .nav-item { justify-content: center; padding: 14px; }
+  }
+
   .sidebar-footer {
-    padding: 16px; border-top: 1px solid var(--border);
-    .version { font-size: 11px; color: var(--text-muted); text-align: center; }
+    padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);
+    .version { font-size: 11px; color: rgba(255, 255, 255, 0.5); text-align: center; }
   }
 
   @media (max-width: 768px) {
