@@ -1,0 +1,98 @@
+<div class="pub-page">
+  <!-- SHARED NAV -->
+  <nav class="home-nav sticky-nav">
+    <div class="nav-logo" (click)="goHome()" style="cursor:pointer">
+      <span class="logo-icon">🏛️</span>
+      <span class="logo-text">The Grand Library</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" (click)="goHome()">Home</a>
+      <a class="nav-link" (click)="goTo('about')">About</a>
+      <a class="nav-link" (click)="goTo('services')">Services</a>
+      <a class="nav-link active" (click)="goTo('contact')">Contact Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      <button class="btn btn-primary" (click)="goToRegister()">Sign Up</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="pub-hero no-bg">
+    <div class="pub-hero-badge">📞 Connect With Us</div>
+    <h1>Contact <span class="gradient-text">Us</span></h1>
+    <p>Everything you need to visit, call, or write to our heritage institution.</p>
+  </div>
+
+  <section class="content-section">
+    <div class="info-grid">
+
+      <!-- 1. CONTACT -->
+      <div class="info-detail-card glass-card">
+        <div class="idc-icon">📞</div>
+        <h3>Get in Touch</h3>
+        <div class="contact-items">
+          <div class="contact-row">
+            <span class="contact-label">📧 Email</span>
+            <span>hello&#64;grandlibrary.org</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">📱 Phone</span>
+            <span>(555) 123-4567</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. TIMING -->
+      <div class="info-detail-card glass-card">
+        <div class="idc-icon">🕒</div>
+        <h3>Opening Hours</h3>
+        <table class="hours-table">
+          <tr>
+            <td>Mon – Fri</td>
+            <td>8:00 AM – 9:00 PM</td>
+          </tr>
+          <tr>
+            <td>Sat – Sun</td>
+            <td>10:00 AM – 6:00 PM</td>
+          </tr>
+        </table>
+        <div class="hours-note">🔔 Closed on public holidays</div>
+      </div>
+
+      <!-- 3. LOCATION -->
+      <div class="info-detail-card glass-card">
+        <div class="idc-icon">📍</div>
+        <h3>Visit Us</h3>
+        <div class="location-details">
+          <p><strong>123 Wisdom Avenue</strong></p>
+          <p>Heritage District, Central City</p>
+          <p>PIN: 400 001</p>
+        </div>
+        <div class="location-note">
+          <p>🚇 Metro: Heritage Station (Line 2)</p>
+          <p>🚌 Bus: Routes 45, 67, 102</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="join-cta">
+    <div class="cta-card glass-card">
+      <h2>Join Our Community</h2>
+      <p>Become a member today and access our full collection of rare books.</p>
+      <div class="cta-btns">
+        <button class="btn btn-primary" (click)="goToRegister()">Sign Up Free</button>
+        <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="pub-footer">
+    <span class="footer-logo">🏛️ The Grand Library</span>
+    <span class="footer-copy">© 2024 Central Community Library Organization.</span>
+  </footer>
+</div>

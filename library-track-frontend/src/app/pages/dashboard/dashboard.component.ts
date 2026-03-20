@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { LoanService } from '../../core/services/loan.service';
 import { ReservationService } from '../../core/services/reservation.service';
 import { ReadingProgressService } from '../../core/services/reading-progress.service';
 import { BookService } from '../../core/services/book.service';
-import { Book, DashboardDto, LoanDto, ReadingProgressDto, ReservationDto } from '../../models/models';
+import { CategoryService } from '../../core/services/category.service';
+import { Book, Category, DashboardDto, LoanDto, ReadingProgressDto, ReservationDto } from '../../models/models';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -18,6 +20,7 @@ export class DashboardComponent implements OnInit {
   loading = true;
   error = '';
   currentTime = new Date();
+  categories: Category[] = [];
 
   // Reader Specific Data
   activeReading: ReadingProgressDto[] = [];
@@ -31,11 +34,15 @@ export class DashboardComponent implements OnInit {
     private loanService: LoanService,
     private resService: ReservationService,
     private progressService: ReadingProgressService,
-    private bookService: BookService
+    private bookService: BookService,
+    private catService: CategoryService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     setInterval(() => this.currentTime = new Date(), 1000);
+    // Pre-load categories for interactive chart navigation
+    this.catService.getAll().subscribe({ next: r => this.categories = r.data || [] });
     this.loadDashboard();
   }
 
@@ -99,6 +106,16 @@ export class DashboardComponent implements OnInit {
   // ── HELPERS ──────────────────────────────────────
   get booksPerCategoryKeys(): string[] {
     return this.dashboard?.booksPerCategory ? Object.keys(this.dashboard.booksPerCategory) : [];
+  }
+
+  /** Navigate to the Books page pre-filtered by the clicked category */
+  navigateToCategory(categoryName: string): void {
+    const cat = this.categories.find(c => c.name === categoryName);
+    if (cat?.categoryId) {
+      this.router.navigate(['/books'], { queryParams: { categoryId: cat.categoryId } });
+    } else {
+      this.router.navigate(['/books']);
+    }
   }
 
   getGreeting(): string {

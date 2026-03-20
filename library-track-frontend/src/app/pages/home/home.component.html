@@ -1,31 +1,32 @@
 <div class="home-page">
-  <!-- HERO -->
-  <header class="hero">
-    <nav class="home-nav">
-      <div class="nav-logo">
-        <span class="logo-icon">🏛️</span>
-        <span class="logo-text">The Grand Library</span>
-      </div>
-      <div class="nav-actions">
-        <button class="btn btn-secondary" (click)="goToLogin()">Member Login</button>
-        <button class="btn btn-primary" (click)="goToRegister()">Join Today</button>
-      </div>
-    </nav>
+  <!-- STICKY NAV -->
+  <nav class="home-nav sticky-nav">
+    <div class="nav-logo" style="cursor:pointer" (click)="goHome()">
+      <span class="logo-icon">🏛️</span>
+      <span class="logo-text">The Grand Library</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" (click)="goHome()">Home</a>
+      <a class="nav-link" (click)="goTo('about')">About</a>
+      <a class="nav-link" (click)="goTo('services')">Services</a>
+      <a class="nav-link" (click)="goTo('contact')">Contact Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      <button class="btn btn-primary" (click)="goToRegister()">Sign Up</button>
+    </div>
+  </nav>
 
+  <!-- HERO -->
+  <header class="hero" id="home">
     <div class="hero-content">
-      
-      <h1>Discover Your Next<br><span class="gradient-text">Great Story</span></h1>
-      <p class="hero-subtitle">
-        Enter a world of knowledge, imagination, and community. Explore our vast collections 
-        and find your place in our story.
-      </p>
-      <div class="hero-actions">
-        <button class="btn btn-primary hero-cta" (click)="goToRegister()">
-          Become a Member
-        </button>
-        <button class="btn btn-secondary hero-cta" (click)="goToLogin()">
-          Access Your Bookshelf
-        </button>
+      <div class="glass-hero-card">
+        <div class="hero-badge">🏛️ Est. 1895 &nbsp;·&nbsp; Heritage Library</div>
+        <h1>Discover Your Next<br><span class="gradient-text">Great Story</span></h1>
+        <p class="hero-subtitle">
+          Enter a world of knowledge, imagination, and community. Explore our vast physical collections
+          and find your place in our century-old story.
+        </p>
       </div>
     </div>
   </header>
@@ -33,64 +34,44 @@
   <!-- QUICK INFO -->
   <section class="quick-info">
     <div class="info-grid">
-      <div class="info-card glass-card">
-        <h3>🕒 Opening Hours</h3>
-        <p>Mon - Fri: 8 AM - 9 PM</p>
-        <p>Sat - Sun: 10 AM - 6 PM</p>
+      <div class="info-card">
+        <h3>Vast Collections</h3>
+        <p>A diverse library of rare and modern physical volumes.</p>
       </div>
-      <div class="info-card glass-card">
-        <h3>📍 Location</h3>
-        <p>123 Wisdom Avenue</p>
-        <p>Heritage District, Central City</p>
+      <div class="info-card">
+        <h3>24/7 Access</h3>
+        <p>Our online portal is always open for reservations and tracking.</p>
       </div>
-      <div class="info-card glass-card">
-        <h3>📞 Contact</h3>
-        <p>Email: hello@grandlibrary.org</p>
-        <p>Phone: (555) 123-4567</p>
+      <div class="info-card">
+        <h3>Heritage Site</h3>
+        <p>A beautiful architectural landmark dedicated to the love of reading.</p>
       </div>
     </div>
   </section>
 
-  <!-- SERVICES -->
+  <!-- FEATURES -->
   <section class="features">
-    <div class="section-badge">✨ Our Services</div>
-    <h2>Beyond the Bookshelf</h2>
-    <p class="section-subtitle">Discover everything our library has to offer to our members.</p>
+    <div class="section-badge">✨ Key Features</div>
+    <h2>Everything You Need</h2>
+    <p class="section-subtitle">Experience a modern way to interact with a traditional library institution.</p>
+
     <div class="features-grid">
-      <div class="feature-card glass-card" *ngFor="let f of features">
-        <div class="feature-icon">{{ f.icon }}</div>
+      <div class="feature-card" *ngFor="let f of features">
+        <span class="feature-icon">{{ f.icon }}</span>
         <h3>{{ f.title }}</h3>
         <p>{{ f.desc }}</p>
       </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="about-section">
-    <div class="about-content glass-card">
-      <div class="section-badge">🏛️ About Us</div>
-      <h2>Preserving History, Inspiring Future</h2>
-      <p>
-        Founded in 1895, The Grand Library has been a cornerstone of the community for over a century. 
-        We are dedicated to fostering a love for reading, providing equal access to information, 
-        and creating a space where everyone is welcome to learn and grow.
-      </p>
-      <div class="about-stats">
-        <div class="a-stat"><b>50k+</b><span>Books</span></div>
-        <div class="a-stat"><b>10k+</b><span>Members</span></div>
-        <div class="a-stat"><b>200+</b><span>Weekly Events</span></div>
-      </div>
-    </div>
-  </section>
-
   <!-- CTA -->
   <section class="cta-section">
-    <div class="cta-card glass-card">
-      <h2>Join Our Reading Community</h2>
-      <p>Start your journey with us today and access thousands of resources both in-person and online.</p>
-      <div class="cta-buttons">
-        <button class="btn btn-primary" (click)="goToRegister()">Join our Community</button>
-        <button class="btn btn-secondary" (click)="goToLogin()">Member Portal</button>
+    <div class="cta-card">
+      <h2>Join Our Legacy</h2>
+      <p>Become a member today and start your journey through our grand collection of literature.</p>
+      <div class="cta-btns">
+        <button class="btn btn-primary" (click)="goToRegister()">Join the Legacy</button>
+        <button class="btn btn-secondary" (click)="goToLogin()">Member Access</button>
       </div>
     </div>
   </section>
@@ -98,6 +79,7 @@
   <!-- FOOTER -->
   <footer class="footer">
     <span class="footer-logo">🏛️ The Grand Library</span>
-    <span class="footer-copy">© 2024 Central Community Library Organization. Dedicated to the pursuit of knowledge.</span>
+    <span class="footer-copy">© 2024 Central Community Library Organization. Dedicated to the pursuit of
+      knowledge.</span>
   </footer>
 </div>

@@ -86,7 +86,7 @@ public class DashboardServiceImp implements DashboardService {
                 .count();
 
         long totalInProgressCount = readingProgressRepo.findAll().stream()
-                .filter(p -> p.getPercentageComplete() != null && p.getPercentageComplete() < 100 && !isHistory(p))
+                .filter(p -> p.getPercentageComplete() != null && p.getPercentageComplete() < 100)
                 .count();
 
         DashboardDto dto = DashboardDto.builder()

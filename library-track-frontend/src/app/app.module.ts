@@ -21,6 +21,9 @@ import { ReservationsComponent } from './pages/reservations/reservations.compone
 import { ReadingProgressComponent } from './pages/reading-progress/reading-progress.component';
 import { UsersComponent } from './pages/users/users.component';
 import { ProfileComponent } from './shared/components/profile/profile.component';
+import { AboutComponent } from './pages/about/about.component';
+import { ServicesComponent } from './pages/services/services.component';
+import { ContactComponent } from './pages/contact/contact.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +40,10 @@ import { ProfileComponent } from './shared/components/profile/profile.component'
     ReservationsComponent,
     ReadingProgressComponent,
     UsersComponent,
-    ProfileComponent
+    ProfileComponent,
+    AboutComponent,
+    ServicesComponent,
+    ContactComponent
   ],
   imports: [
     BrowserModule,

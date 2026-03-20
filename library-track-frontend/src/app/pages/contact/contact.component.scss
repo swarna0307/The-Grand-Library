@@ -1,0 +1,101 @@
+@import '../about/about.component.scss';
+
+.contact-section {
+  padding: 80px 100px;
+  background: #f8faff;
+
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 1300px;
+  margin: 0 auto;
+
+  .info-detail-card:last-child {
+    grid-column: span 2;
+    justify-self: center;
+    width: 100%;
+    max-width: 634px; // Matches 1fr width in 1300px container
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    .info-detail-card:last-child {
+      grid-column: span 1;
+    }
+  }
+}
+
+.info-detail-card {
+  height: 100%;
+  padding: 48px 40px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(79, 70, 229, 0.1) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.4s ease;
+  margin: 0 !important;
+  text-align: center;
+
+  &:hover {
+    transform: translateY(-8px);
+    background: #ffffff !important;
+    border-color: rgba(79, 70, 229, 0.4) !important;
+    box-shadow: 0 20px 50px rgba(79, 70, 229, 0.12) !important;
+  }
+
+  .idc-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+    display: block;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+  }
+
+  h3 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e1b4b;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+  }
+
+  .hours-table {
+    margin: 0 auto;
+  }
+
+  .contact-items {
+    align-items: center;
+  }
+
+  .location-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .location-note {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 16px;
+  }
+
+  .hours-table td {
+    padding: 12px 6px;
+  }
+
+  .contact-row {
+    padding: 14px 0;
+  }
+}

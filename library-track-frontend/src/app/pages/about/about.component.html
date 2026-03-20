@@ -1,0 +1,77 @@
+<div class="pub-page">
+  <!-- SHARED NAV -->
+  <nav class="home-nav sticky-nav">
+    <div class="nav-logo" (click)="goHome()" style="cursor:pointer">
+      <span class="logo-icon">🏛️</span>
+      <span class="logo-text">The Grand Library</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" (click)="goHome()">Home</a>
+      <a class="nav-link active" (click)="goTo('about')">About</a>
+      <a class="nav-link" (click)="goTo('services')">Services</a>
+      <a class="nav-link" (click)="goTo('contact')">Contact Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      <button class="btn btn-primary" (click)="goToRegister()">Sign Up</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="pub-hero no-bg">
+    <div class="pub-hero-badge">📚 Est. 1895</div>
+    <h1>About <span class="gradient-text">The Grand Library</span></h1>
+    <p>A century of knowledge, community, and heritage at the heart of the city.</p>
+  </div>
+
+  <!-- OUR STORY -->
+  <section class="content-section">
+    <div class="section-badge">📖 Our Story</div>
+    <h2>Preserving History, Inspiring Future</h2>
+    <p class="section-text">
+      Founded in 1895, The Grand Library has been a cornerstone of the community for over a century.
+      What began as a modest reading room of 500 volumes has grown into one of the region's most
+      beloved cultural institutions, housing over 50,000 physical books across dozens of genres and disciplines.
+    </p>
+    <p class="section-text">
+      We are dedicated to fostering a love for reading, providing equal access to knowledge,
+      and creating a welcoming space where everyone is invited to learn, grow, and connect.
+    </p>
+    <div class="story-pillars">
+      <div class="pillar-card glass-card">
+        <div class="pillar-icon">📚</div>
+        <h3>Knowledge</h3>
+        <p>Access to a rich, curated catalogue spanning over a century of literary and academic heritage.</p>
+      </div>
+      <div class="pillar-card glass-card">
+        <div class="pillar-icon">🤝</div>
+        <h3>Community</h3>
+        <p>A gathering place for readers, learners, and thinkers from all walks of life.</p>
+      </div>
+      <div class="pillar-card glass-card">
+        <div class="pillar-icon">🏛️</div>
+        <h3>Heritage</h3>
+        <p>130+ years of dedicated service to the pursuit of knowledge and cultural preservation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="join-cta">
+    <div class="cta-card glass-card">
+      <h2>Ready to Join?</h2>
+      <p>Become a member today and enjoy everything The Grand Library has to offer.</p>
+      <div class="cta-btns">
+        <button class="btn btn-primary" (click)="goToRegister()">Sign Up Free</button>
+        <button class="btn btn-secondary" (click)="goToLogin()">Already a Member? Sign In</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="pub-footer">
+    <span class="footer-logo">🏛️ The Grand Library</span>
+    <span class="footer-copy">© 2024 Central Community Library Organization. Dedicated to the pursuit of
+      knowledge.</span>
+  </footer>
+</div>

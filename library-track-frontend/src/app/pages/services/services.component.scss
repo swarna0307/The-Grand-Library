@@ -1,0 +1,3 @@
+// Services page reuses the shared styles from about.component.scss
+// Just point to the same shared styles file for DRY-ness
+@import '../about/about.component.scss';

@@ -69,16 +69,20 @@
 
           <!-- CHARTS -->
           <div class="charts-grid">
-            <div class="glass-card chart-card" *ngIf="dashboard?.booksPerCategory">
+          <div class="glass-card chart-card" *ngIf="dashboard?.booksPerCategory">
               <h3>📊 Books Per Category</h3>
+              <p class="chart-hint">Click a category to browse its books</p>
               <div class="bar-chart">
-                <div class="bar-row" *ngFor="let key of booksPerCategoryKeys">
+                <div class="bar-row clickable" *ngFor="let key of booksPerCategoryKeys"
+                     (click)="navigateToCategory(key)"
+                     title="View books in {{ key }}">
                   <div class="bar-label">{{ key }}</div>
                   <div class="bar-track">
                     <div class="bar-fill"
                       [style.width.%]="(dashboard!.booksPerCategory![key] / (dashboard?.totalBooks || 1)) * 100"></div>
                   </div>
                   <div class="bar-value">{{ dashboard?.booksPerCategory?.[key] }}</div>
+                  <div class="bar-nav-hint">→</div>
                 </div>
               </div>
             </div>

@@ -1,0 +1,87 @@
+<div class="pub-page">
+  <!-- SHARED NAV -->
+  <nav class="home-nav sticky-nav">
+    <div class="nav-logo" (click)="goHome()" style="cursor:pointer">
+      <span class="logo-icon">🏛️</span>
+      <span class="logo-text">The Grand Library</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" (click)="goHome()">Home</a>
+      <a class="nav-link" (click)="goTo('about')">About</a>
+      <a class="nav-link active" (click)="goTo('services')">Services</a>
+      <a class="nav-link" (click)="goTo('contact')">Contact Us</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      <button class="btn btn-primary" (click)="goToRegister()">Sign Up</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="pub-hero no-bg">
+    <div class="pub-hero-badge">✨ What We Offer</div>
+    <h1>Our <span class="gradient-text">Services</span></h1>
+    <p>Discover everything The Grand Library has to offer its members and visitors.</p>
+  </div>
+
+  <!-- SERVICES GRID -->
+  <section class="content-section services-section">
+    <div class="services-grid">
+      <div class="service-card glass-card" *ngFor="let s of services">
+        <div class="service-icon">{{ s.icon }}</div>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="section-badge">🔄 How It Works</div>
+    <h2>Getting Started Is Easy</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h4>Register</h4>
+        <p>Create your free member account in just a few seconds.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h4>Browse</h4>
+        <p>Explore our catalogue and find the books you love.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h4>Reserve or Borrow</h4>
+        <p>Reserve online and pick up at your convenience.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h4>Track & Enjoy</h4>
+        <p>Follow your reading progress and discover your next great read.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="join-cta">
+    <div class="cta-card glass-card">
+      <h2>Start Your Reading Journey</h2>
+      <p>Join thousands of members already enjoying everything The Grand Library has to offer.</p>
+      <div class="cta-btns">
+        <button class="btn btn-primary" (click)="goToRegister()">Sign Up Free</button>
+        <button class="btn btn-secondary" (click)="goToLogin()">Sign In</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="pub-footer">
+    <span class="footer-logo">🏛️ The Grand Library</span>
+    <span class="footer-copy">© 2024 Central Community Library Organization. Dedicated to the pursuit of
+      knowledge.</span>
+  </footer>
+</div>
